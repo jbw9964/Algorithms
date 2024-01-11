@@ -11,7 +11,7 @@
 
 ---
 
-### 풀이 중 마주친 어려움
+### 풀이 중 마주친 issue
 
 - 초기 코드는 아래처럼 만들었음.
 
@@ -59,9 +59,9 @@ print(*Result[1])
 
 ---
 
-### 어려움 극복 과정
+### issue 해결 과정
 
-- 찾아보니 애초에 `Deque` 와 `list` 의 차이를 간과했음. 동일한 역할을 수행할 수 있지만 `pop` 연산에서 `time complexity` 차이가 심했음. [`(link)`](https://wellsw.tistory.com/122)
+- 찾아보니 애초에 `Deque` 와 `list` 의 차이를 간과했음. 동일한 역할을 수행할 수 있지만 `pop` 연산에서 `time complexity` 차이가 심했음. (`Deque : O(1)`, `list : O(n)`) [`(link)`](https://wellsw.tistory.com/122)
 
 - 그리고 `BFS_list` 에 움직인 이전 기록들을 계속 저장하며 메모리초과 에러가 발생하는 것을 깨달음.
 - 이를 해결할 방안이 떠오르지 않아 다른 사람의 코드를 확인. [`(link)`](https://paris-in-the-rain.tistory.com/102)
