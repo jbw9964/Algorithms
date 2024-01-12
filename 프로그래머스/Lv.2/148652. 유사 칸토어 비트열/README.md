@@ -1,10 +1,10 @@
 # [level Lv.2] 유사 칸토어 비트열 - 148652 
 
-[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/148652?language=python3) 
+[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/148652) 
 
 ### 성능 요약
 
-메모리: 10.4 MB, 시간: 4.91 ms
+메모리: 10.3 MB, 시간: 2.82 ms
 
 ### 구분
 
@@ -16,7 +16,7 @@
 
 ### 제출 일자
 
-2024년 1월 5일 22:36:59
+2024년 1월 5일 22:45:45
 
 ### 문제 설명
 

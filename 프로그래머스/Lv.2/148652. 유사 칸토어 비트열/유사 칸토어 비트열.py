@@ -23,33 +23,33 @@ def solution(n, l, r):
         r_leaf //= 5
         level += 1
 
-    upper_level = n - level
-    stem_index = l_leaf
+    upper_level = n - level         # remaining upper levels of tree
+    stem_index = l_leaf             # corresponding index of leaf nodes
 
     index_queue = deque()
     index_queue.appendleft(stem_index)
 
-    for _ in range(upper_level) : 
+    for _ in range(upper_level) :               # store which index (node of tree) has to be selected
         stem_index //= 5
         index_queue.appendleft(stem_index)
 
     string = "1"
     index_queue.popleft()
 
-    for _ in range(upper_level) : 
+    for _ in range(upper_level) :                   # select last corresponding node
         string = gen_cantorian(string)
         string = string[index_queue.popleft() % 5]
 
 
     # gen lower levels
-    for _ in range(level) : 
+    for _ in range(level) :                     # generate lower tree (to leaf)
         string = gen_cantorian(string)
-        l_leaf *= 5
+        l_leaf *= 5                             # calc index threshold
 
-    string = string[l - l_leaf : r - l_leaf + 1]
+    string = string[l - l_leaf : r - l_leaf + 1]    # select string
+
     answer = 0
-
-    for char in string : 
+    for char in string :            # count answer
         if int(char) == 1 : 
             answer += 1
 
