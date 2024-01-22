@@ -2,57 +2,35 @@
 N = int(input())
 string = input()
 
-
 index = 0
 count = 0
-while index < len(string) : 
+
+while index < len(string) - 3 : 
+    num_1 = int(string[index])
+    num_2 = int(string[index + 1])
+    num_3 = int(string[index + 2])
+    num_4 = int(string[index + 3])
+
+    check_num = 100 * num_1 + 10 * num_2 + num_3
+
+    if check_num <= 641 and num_4 != 0  :   index += 3      # check whether 3 digit is possible
+    elif num_3 != 0                     :   index += 2      # check whether 2 digit is possible
+    else                                :   index += 1      # only 1 digit is possible
     
-    remain_digit = len(string) - index
-    if remain_digit < 3 : 
-        count += 1
-        break
-    
-    elif remain_digit == 3 : 
-        first_char = int(string[index])
-        second_char = int(string[index + 1])
-        third_char = int(string[index + 2])
-        fourth_char = 5
-    
-    else : 
-        first_char = int(string[index])
-        second_char = int(string[index + 1])
-        third_char = int(string[index + 2])
-        fourth_char = int(string[index + 3])
-
-    assert first_char != 0, AssertionError
-
-    if first_char > 6 :     # 2, 1 digits
-        if third_char == 0  :   pass        # 1 digit
-        else                :   index += 1  # 2 digit
-
-    elif first_char == 6 :  # 3, 2, 1 digits
-        
-        if second_char < 4 :        # 3, 2 digits
-            
-            if fourth_char == 0 : index += 1    # 2 digit
-            else                : index += 2    # 3 digit
-
-        elif second_char == 4 :     # 3, 2 digits
-            
-            if third_char > 2 or fourth_char == 0   :   index += 1      # 2 digit
-            else                                    :   index += 2      # 3 digit
-
-        else :                      # 2, 1 digits
-            if third_char == 3  :   pass        # 1 digit
-            else                :   index += 1  # 2 digit
-
-    else :                  # 3, 2, 1 digits
-        
-        if fourth_char != 0     :   index += 2  # 3 digit
-        elif third_char != 0    :   index += 1  # 2 digit
-        else                    :   pass        # 1 digit
-
-    index += 1
     count += 1
+
+remain_digit = len(string) - index
+
+if remain_digit == 0        :   pass
+elif remain_digit < 3       :   count += 1
+else : 
+    num_1 = int(string[index])
+    num_2 = int(string[index + 1])
+    num_3 = int(string[index + 2])
+
+    check_num = 100 * num_1 + 10 * num_2 + num_3
+
+    if check_num <= 641 and remain_digit != 4   :   count += 1
+    else                                        :   count += 2
 
 print(count)
