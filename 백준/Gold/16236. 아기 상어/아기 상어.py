@@ -1,6 +1,4 @@
 
-from collections import deque
-
 def BFS(pos_y, pos_x, level) : 
     global Table, N
     
@@ -12,54 +10,48 @@ def BFS(pos_y, pos_x, level) :
 
     Target_list = []            # list of nodes where shark can reach to it's position, and eat fish
 
-    Adjacent_list = deque()     # queue that stores adjacent nodes to it's current position
-    Adjacent_list.append([pos_y, pos_x, 0])
+    Adjacent_list = [[pos_y, pos_x, 0]]     # list of nodes where adjacent will be stored
+    Visit_Table[pos_y][pos_x] = True
     
-    while len(Adjacent_list) :  # search available adjacent nodes
-        pos_y, pos_x, dist = Adjacent_list.popleft()
+    while len(Adjacent_list) : 
+        temp_list = []
 
-        if Visit_Table[pos_y][pos_x]    :   continue        # shark visited current node previously
+        for pos_y, pos_x, dist in Adjacent_list : 
+            
+            pos_y_up, pos_x_up          = pos_y - 1, pos_x
+            pos_y_down, pos_x_down      = pos_y + 1, pos_x
+            pos_y_left, pos_x_left      = pos_y, pos_x - 1
+            pos_y_right, pos_x_right    = pos_y, pos_x + 1
+            
+            for adjacent_y, adjacent_x in [     # check for adjacent
+                [pos_y_up, pos_x_up],
+                [pos_y_down, pos_x_down],
+                [pos_y_left, pos_x_left],
+                [pos_y_right, pos_x_right],
+            
+            ] : 
+                # if adjacent node can be reach,
+                if InRange(adjacent_y, adjacent_x) \
+                    and not Visit_Table[adjacent_y][adjacent_x] \
+                    and Table[adjacent_y][adjacent_x] <= level : 
+                    
+                    Visit_Table[adjacent_y][adjacent_x] = True              # fill visit table
+                    temp_list.append([adjacent_y, adjacent_x, dist + 1])    # add to temporal list
 
-        pos_y_up, pos_x_up          = pos_y - 1, pos_x
-        pos_y_down, pos_x_down      = pos_y + 1, pos_x
-        pos_y_left, pos_x_left      = pos_y, pos_x - 1
-        pos_y_right, pos_x_right    = pos_y, pos_x + 1
+                    # if adjacent node can be eatable, add to Target_list
+                    if Table[adjacent_y][adjacent_x] < level and Table[adjacent_y][adjacent_x] != 0 : 
+                        Target_list.append([adjacent_y, adjacent_x, dist + 1])
 
-        # does upper adjacent node available?
-        if InRange(pos_y_up, pos_x_up) \
-            and not Visit_Table[pos_y_up][pos_x_up] \
-            and Table[pos_y_up][pos_x_up] <= level          :   Adjacent_list.append([pos_y_up, pos_x_up, dist + 1])
+        # if available fish exists, return to main
+        if Target_list :        # available fish will be always in shortest distance
+            Target_list = sorted(Target_list, key=lambda x : (x[2], x[0], x[1]))
+            return Target_list[0]
         
-        # does lower adjacent node available?
-        if InRange(pos_y_down, pos_x_down) \
-            and not Visit_Table[pos_y_down][pos_x_down] \
-            and Table[pos_y_down][pos_x_down] <= level      :   Adjacent_list.append([pos_y_down, pos_x_down, dist + 1])
-        
-        # does left adjacent node available?
-        if InRange(pos_y_left, pos_x_left) \
-            and not Visit_Table[pos_y_left][pos_x_left] \
-            and Table[pos_y_left][pos_x_left] <= level      :   Adjacent_list.append([pos_y_left, pos_x_left, dist + 1])
-        
-        # does right adjacent node available?
-        if InRange(pos_y_right, pos_x_right) \
-            and not Visit_Table[pos_y_right][pos_x_right] \
-            and Table[pos_y_right][pos_x_right] <= level    :   Adjacent_list.append([pos_y_right, pos_x_right, dist + 1])
-
-        # can shark eat the fish of current node?
-        if Table[pos_y][pos_x] < level and Table[pos_y][pos_x] != 0     :   Target_list.append([pos_y, pos_x, dist])
-        
-        Visit_Table[pos_y][pos_x] = True        # fill visit table
-
-
-    # there is fish that shark can eat
-    if len(Target_list) :
-        # sort list via requirements    |   shortest distance, most upper left node
-        Target_list = sorted(Target_list, key=lambda x : (x[2], x[0], x[1]))
-        return Target_list[0]
-
-    # there is no fish that shark can eat
-    else    :   return None
-
+        # if not, intialize adjacents
+        else    :   Adjacent_list = temp_list
+    
+    # if we checked all moveable nodes & there is no available fish, return None
+    return None
 
 
 N = int(input())
