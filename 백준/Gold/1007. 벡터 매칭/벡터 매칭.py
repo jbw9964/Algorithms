@@ -1,4 +1,3 @@
-
 from math import sqrt, inf
 from itertools import combinations
 
