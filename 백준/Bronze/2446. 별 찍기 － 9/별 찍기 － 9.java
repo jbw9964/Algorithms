@@ -15,15 +15,15 @@ public class Main {
         int length = 2 * N - 1;
 
         for (int line = 1; line < N; line++) {
-            STR.append(" ".repeat(line - 1));
-            STR.append("*".repeat(length - 2 * line + 2));
-            STR.append('\n');
+            STR.append(" ".repeat(line - 1))
+                .append("*".repeat(length - 2 * line + 2))
+                .append('\n');
         }
 
         for (int line = 1; line < N + 1; line++) {
-            STR.append(" ".repeat(N - line));
-            STR.append("*".repeat(2 * line - 1));
-            STR.append('\n');
+            STR.append(" ".repeat(N - line))
+                .append("*".repeat(2 * line - 1))
+                .append('\n');
         }
 
         System.out.println(STR.toString());
