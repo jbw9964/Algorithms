@@ -4,28 +4,30 @@ import java.io.InputStreamReader;
 
 public class Main {
     
-    private static BufferedReader br = new BufferedReader(
+    private static final BufferedReader br = new BufferedReader(
         new InputStreamReader(System.in)
     );
 
+    private static int[] Result = {0, 0, 0};
+
     public static void main(String[] args) throws IOException {
         
-        int maxima = 0;
-        int[] maximumIndex = {0, 0};
-        
+        int element;
+        String[] stringArray;
+
         for (int i = 0; i < 9; i++) {
-            String[] stringArray = br.readLine().split(" ");
+            stringArray = br.readLine().split(" ");
 
             for (int j = 0; j < 9; j++) {
-                int element = Integer.parseInt(stringArray[j]);
-                if (element >= maxima) {
-                    maxima = element;
-                    maximumIndex[0] = i + 1;
-                    maximumIndex[1] = j + 1;
+                element = Integer.parseInt(stringArray[j]);
+                if (element >= Result[0]) {
+                    Result[0] = element;
+                    Result[1] = i + 1;
+                    Result[2] = j + 1;
                 }
             }
         }
 
-        System.out.println(maxima + "\n" + maximumIndex[0] + " " + maximumIndex[1]);
+        System.out.println(Result[0] + "\n" + Result[1] + " " + Result[2]);
     }
 }
