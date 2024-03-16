@@ -22,6 +22,8 @@ public class Main {
         String[] array = new String[N];
         for (int i = 0; i < N; i++) array[i] = String.valueOf(i + 1);
 
+        String tempString;
+
         for (int count = 0; count < M; count++) {
             linstStrings = br.readLine().split(" ");
 
@@ -30,7 +32,12 @@ public class Main {
 
             if (i == j) continue;
 
-            Main.reverse(array, i, j);
+            while (i < j) {
+                tempString = array[i];
+                array[i++] = array[j];
+                array[j--] = tempString;
+            }
+
         }
 
         for (String element : array) {
@@ -38,17 +45,5 @@ public class Main {
         }
 
         bw.flush();
-    }
-
-    public static <T> void reverse(T[] array, int head, int tail) 
-        throws IndexOutOfBoundsException {
-        
-        T tempValue;
-
-        while (head < tail) {
-            tempValue = array[head];
-            array[head++] = array[tail];
-            array[tail--] = tempValue;
-        }
     }
 }
