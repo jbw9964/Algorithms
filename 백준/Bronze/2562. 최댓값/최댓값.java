@@ -1,8 +1,6 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 
 public class Main {
     
@@ -10,25 +8,23 @@ public class Main {
         new InputStreamReader(System.in)
     );
 
-    private static final BufferedWriter bw = new BufferedWriter(
-        new OutputStreamWriter(System.out)
-    );
-
     private static final int NUM = 9;
 
     public static void main(String[] args) throws IOException {
         
-        int[] maxima = {0, 0};
-        int value;
+        int[] array = new int[NUM];
 
-        for (int i = 0; i < NUM; i++) {
-            if ((value = Integer.parseInt(br.readLine().split(" ")[0])) > maxima[0]) {
-                maxima[0] = value;
-                maxima[1] = i + 1;
+        for (int i = 0; i < NUM; i++)   array[i] = Integer.valueOf(br.readLine());
+
+        int maxima = array[0];
+        int maxIndex = 1;
+        for (int i = 1; i < NUM; i++) {
+            if (array[i] >= maxima) {
+                maxima = array[i];
+                maxIndex = i + 1;
             }
         }
-        
-        System.out.println(maxima[0] + "\n" + maxima[1]);
-        
+
+        System.out.println(maxima + "\n" + maxIndex);
     }
 }
