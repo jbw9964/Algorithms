@@ -1,15 +1,12 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.StringTokenizer;
 
 public class Main {
     
     private static BufferedReader br = new BufferedReader(
         new InputStreamReader(System.in)
     );
-    
-    private static String lineString = null;
 
     public static void main(String[] args) throws IOException {
         
@@ -17,11 +14,10 @@ public class Main {
         int[] maximumIndex = {0, 0};
         
         for (int i = 0; i < 9; i++) {
-            lineString = br.readLine();
-            StringTokenizer tokenizer = new StringTokenizer(lineString);
+            String[] stringArray = br.readLine().split(" ");
 
             for (int j = 0; j < 9; j++) {
-                int element = Integer.parseInt(tokenizer.nextToken());
+                int element = Integer.parseInt(stringArray[j]);
                 if (element >= maxima) {
                     maxima = element;
                     maximumIndex[0] = i + 1;
