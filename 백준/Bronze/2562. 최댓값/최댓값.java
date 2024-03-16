@@ -28,7 +28,7 @@ public class Main {
             }
         }
         
-        bw.write(String.valueOf(maxima[0]) + "\n" + String.valueOf(maxima[1]));
-        bw.flush();
+        System.out.println(maxima[0] + "\n" + maxima[1]);
+        
     }
 }
