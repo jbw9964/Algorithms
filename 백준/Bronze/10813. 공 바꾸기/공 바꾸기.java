@@ -19,10 +19,9 @@ public class Main {
         int N = Integer.parseInt(linstStrings[0]);
         int M = Integer.parseInt(linstStrings[1]);
 
-        int temp_value;
-
-        int[] array = new int[N];
-        for (int i = 0; i < N; i++) array[i] = i + 1;
+        String[] array = new String[N];
+        String tempValue;
+        for (int i = 0; i < N; i++) array[i] = String.valueOf(i + 1);
 
         for (int count = 0; count < M; count++) {
             linstStrings = br.readLine().split(" ");
@@ -32,12 +31,12 @@ public class Main {
 
             if (i == j) continue;
 
-            temp_value = array[i];
+            tempValue = array[i];
             array[i] = array[j];
-            array[j] = temp_value;
+            array[j] = tempValue;
         }
 
-        for (int element : array) {
+        for (String element : array) {
             bw.write(element + " ");
         }
 
