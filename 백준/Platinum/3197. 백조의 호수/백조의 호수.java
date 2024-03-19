@@ -1,134 +1,148 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayDeque;
-import java.util.Queue;
-
+import java.util.*;
+ 
 public class Main {
-
-    private static final BufferedReader br = new BufferedReader(
-        new InputStreamReader(System.in)
-    );
-
-    private static final BufferedWriter bw = new BufferedWriter(
-        new OutputStreamWriter(System.out)
-    );
-
-    private static boolean[][] Array;       // true : water | false : ice
-    private static boolean[][] VisitTable;
-    private static int R, C;
-
-    private static int[] dx = {1, -1, 0, 0}, dy = {0, 0, 1, -1};
-
-    static class Coord {
-        int row, col;
-        public Coord(int i, int j)  {this.row = i; this.col = j;}
+ 
+    static class Node {
+        int x;
+        int y;
+ 
+        public Node(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
     }
-
-    private static Coord TargetCoord;
-    private static Queue<Coord> InitCoords = new ArrayDeque<>();
-    private static Queue<Coord> nextInits = new ArrayDeque<>();
-    private static Queue<Coord> tempQueue = new ArrayDeque<>();
-
-    private static boolean inRange(int row, int col) {
-        return 0 <= row && row < R && 0 <= col && col < C;
-    }
-
-
-    public static void main(String[] args) throws IOException {
-        String[] input = br.readLine().split(" ");
-
-        R = Integer.parseInt(input[0]);
-        C = Integer.parseInt(input[1]);
-
-        Array = new boolean[R][C];
-        VisitTable = new boolean[R][C];
-
-        Coord[] coords = null;
-
-        for (int i = 0; i < R; i++) {
-            input = br.readLine().split("");
-
-            for (int j = 0; j < C; j++) {
-                if (input[j].equals("X"))   continue;
-
-                Array[i][j] = true;
-                tempQueue.add(new Coord(i, j));
-
-                if (input[j].equals("L")) {
-                    if (coords != null)   {coords[1] = new Coord(i, j);  continue;}
-                    
-                    coords = new Coord[2];
-                    coords[0] = new Coord(i, j);
+ 
+ 
+    // 백조 인접 여부
+    static boolean check() {
+ 
+ 
+        Queue<Node> newQ = new ArrayDeque<>();
+        while (!Q.isEmpty()) {
+ 
+            int size = Q.size();
+            while (size-- > 0) {
+                Node cur = Q.poll();
+                int x = cur.x;
+                int y = cur.y;
+ 
+                if (cur.x == end.x && cur.y == end.y) {
+                    return true;
                 }
+ 
+ 
+                for (int i = 0; i < 4; i++) {
+                    int nx = x + dx[i];
+                    int ny = y + dy[i];
+ 
+                    if (isOut(nx, ny) || visited[nx][ny]) {
+                        continue;
+                    }
+ 
+                    visited[nx][ny] = true;
+                    if (G[nx][ny] == 'X') {
+                        newQ.add(new Node(nx, ny));
+                        continue;
+                    }
+                    Q.add(new Node(nx, ny));
+                }
+ 
             }
         }
-
-        TargetCoord = coords[0];
-        InitCoords.add(coords[1]);
-
-        int days = 0;
-        do {
-            meltIce();
-            days++;
-        } while (!BFS());
-
-        bw.write(String.valueOf(days));
-        bw.flush();
+        Q = newQ;
+        return false;
+ 
     }
-
-    private static void meltIce() {
-        Queue<Coord> tempQueue_local = new ArrayDeque<>();
-        
-        Coord check;
-        int row, col;
-
-        while ((check = tempQueue.poll()) != null) {
-            row = check.row;
-            col = check.col;
-
-            for (int i = 0; i < 4; i++) {
-                if (!inRange(row + dx[i], col + dy[i]) || Array[row + dx[i]][col + dy[i]]) continue;
-
-                Array[row + dx[i]][col + dy[i]] = true;
-                tempQueue_local.add(new Coord(row + dx[i], col + dy[i]));
-            }
+ 
+    static boolean isOut(int x, int y) {
+        if (x < 0 || y < 0 || x >= R || y >= C) {
+            return true;
         }
-
-        tempQueue = tempQueue_local;
+        return false;
+ 
     }
-
-    private static boolean BFS() {
-        Coord current;
-        int row, col;
-
-        while ((current = InitCoords.poll()) != null) {
-            row = current.row;
-            col = current.col;
-            if (row == TargetCoord.row && col == TargetCoord.col)   return true;
-            
-            VisitTable[row][col] = true;
-
+ 
+ 
+    static void melt() {
+        Queue<Node> melting = new ArrayDeque<>();
+ 
+        while (!water.isEmpty()) {
+            Node cur = water.poll();
+            int x = cur.x;
+            int y = cur.y;
+ 
+ 
             for (int i = 0; i < 4; i++) {
-                if (!inRange(row + dx[i], col + dy[i]) 
-                    || VisitTable[row + dx[i]][col + dy[i]])    continue;
-
-                VisitTable[row + dx[i]][col + dy[i]] = true;
-
-                if (Array[row + dx[i]][col + dy[i]]) {
-                    InitCoords.add(new Coord(row + dx[i], col + dy[i]));
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+ 
+                if (isOut(nx, ny) || G[nx][ny] != 'X') {
                     continue;
                 }
-                
-                nextInits.add(new Coord(row + dx[i], col + dy[i]));
+ 
+                G[nx][ny] = '.';
+                melting.add(new Node(nx, ny));
             }
         }
-
-        InitCoords = nextInits;
-        nextInits = new ArrayDeque<Coord>();
-
-        return false;
+        water = melting;
+    }
+ 
+    static Node start, end;
+    static Queue<Node> Q;
+    static Queue<Node> water;
+    static int[] dx = {-1, 1, 0, 0};
+    static int[] dy = {0, 0, -1, 1};
+    static boolean[][] visited;
+    static int R, C;
+    static char[][] G;
+ 
+    public static void main(String[] args) throws Exception {
+ 
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+ 
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        R = Integer.parseInt(st.nextToken());
+        C = Integer.parseInt(st.nextToken());
+        visited = new boolean[R][C];
+        G = new char[R][C];
+ 
+        water = new ArrayDeque<>();
+        Q = new ArrayDeque<>();
+ 
+ 
+        for (int i = 0; i < R; i++) {
+            G[i] = br.readLine().toCharArray();
+            for (int j = 0; j < C; j++) {
+                if (G[i][j] == 'L') {
+                    if (start == null) {
+                        start = new Node(i, j);
+                        visited[i][j] = true;
+                        Q.add(new Node(i, j));
+                    } else {
+                        end = new Node(i, j);
+                    }
+                    water.add(new Node(i, j));
+                } else if (G[i][j] == '.') {
+                    water.add(new Node(i, j));
+                }
+            }
+        }
+ 
+ 
+        int day = 0;
+ 
+        while (true) {
+            // 백조 인접 여부 확인
+            if (check()) {
+                System.out.println(day);
+                break;
+            }
+            //빙하 녹이기(물 확산)
+            melt();
+            day++;
+        }
+ 
     }
 }
