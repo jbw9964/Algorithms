@@ -21,12 +21,6 @@ public class Main {
     }
 
     public static int GCD(int a, int b) {
-        if (a < b) {
-            a += b;
-            b = a - b;
-            a = a - b;
-        }
-
         int mod = 1;
         while (mod != 0) {
             mod = a % b;
