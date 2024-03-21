@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
 public class Main {
 
@@ -8,22 +9,23 @@ public class Main {
         new InputStreamReader(System.in)
     );
 
+
     public static void main(String[] args) throws IOException {
-        String[] inputString = br.readLine().split(" ");
+        StringTokenizer tokenizer = new StringTokenizer(br.readLine());
         
-        int num1 = Integer.parseInt(inputString[0]);
-        int num2 = Integer.parseInt(inputString[1]);
+        int num1 = Integer.parseInt(tokenizer.nextToken());
+        int num2 = Integer.parseInt(tokenizer.nextToken());
 
         int gcd = GCD(num1, num2);
-        int scm = gcd * (num1 / gcd) * (num2 / gcd);
+        int lcm = num1 * num2 / gcd;
 
-        System.out.println(gcd + " " + scm);
+        System.out.println(gcd);
+        System.out.println(lcm);
     }
 
     public static int GCD(int a, int b) {
-        int mod = 1;
-        while (mod != 0) {
-            mod = a % b;
+        while (b != 0) {
+            int mod = a % b;
             a = b;
             b = mod;
         }
