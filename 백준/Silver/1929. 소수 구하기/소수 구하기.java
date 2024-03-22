@@ -9,9 +9,6 @@ public class Main {
         new InputStreamReader(System.in)
     );
 
-    private static int[] primeArray;
-    private static int[] sieveOfEratosthenes;
-
 
     public static void main(String[] args) throws IOException {
         StringTokenizer tokenizer = new StringTokenizer(br.readLine());
@@ -19,58 +16,29 @@ public class Main {
         int M = Integer.parseInt(tokenizer.nextToken());
         int N = Integer.parseInt(tokenizer.nextToken());
 
-        // primeArray = DPMethod1(M, N);
-        sieveOfEratosthenes = DPMethod2(M, N);
-
-
-        showAnswer(sieveOfEratosthenes, M, N);
-    }
-
-    public static int[] DPMethod1(int M, int N) {
         int[] primeArray = new int[N];
-
-        for (int value = 2; value <= N; value++) {
-            int index;
-            boolean primeFlag = true;
-
-            for (index = 0; index < N; index++) {
-                if (primeArray[index] == 0)                 break;
-                else if (value % primeArray[index] == 0)    {
-                    primeFlag = false;
-                    break;
-                }
-            }
-
-            if (primeFlag)  primeArray[index] = value;
-        }
-
-        return primeArray;
-    }
-
-    public static int[] DPMethod2(int M, int N) {
-        int[] primeArray = new int[N];
-        int index = 0;
-
-        boolean[] sieveOfEratosthenes = new boolean[N + 1];     // true : not a prime number
-        sieveOfEratosthenes[0] = true;
-        sieveOfEratosthenes[1] = true;
+        int prime_count = 0;
 
         for (int number = 2; number <= N; number++) {
-            if (sieveOfEratosthenes[number]) continue;
 
-            primeArray[index++] = number;
-            for (int i = 2;; i++) {
-                if (number * i > N) break;
+            boolean flag = true;
+            for (int i = 0; i < prime_count; i++) {
 
-                sieveOfEratosthenes[number * i] = true;
+                if (primeArray[i] > Math.sqrt(number)) break;
+
+                else if (number % primeArray[i] == 0) {
+                    flag = false;
+                    break;
+                }
+                
             }
+
+            if (flag)   primeArray[prime_count++] = number;
         }
 
-        return primeArray;
-    }
+        for (int i = 0; i < prime_count; i++) {
+            int value = primeArray[i];
 
-    public static void showAnswer(int[] array, int M, int N) {
-        for (int value : array) {
             if (M <= value && value <= N)   System.out.println(value);
         }
     }
