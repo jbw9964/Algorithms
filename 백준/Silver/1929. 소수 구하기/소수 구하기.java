@@ -19,16 +19,19 @@ public class Main {
 
         boolean[] primeArray = new boolean[N + 1];  // false : prime number
         primeArray[0] = primeArray[1] = true;
+        double sqrt = Math.sqrt(N);
 
-        for (int i = 2; i <= N; i++) {
+        for (int i = 2; i <= sqrt; i++) {
             if (primeArray[i])  continue;
 
-            if (M <= i)         sb.append(String.valueOf(i)).append("\n");
-
-            for (int j = 2 * i; j <= N; j += i) primeArray[j] = true;
+            for (int j = i * i; j <= N; j += i) primeArray[j] = true;
         }
         
         
+        for (int i = M; i <= N; i++) {
+            if (!primeArray[i]) sb.append(i).append("\n");
+        }
+
         System.out.println(sb.toString());
     }
 }
