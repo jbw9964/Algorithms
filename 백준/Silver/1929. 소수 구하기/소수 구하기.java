@@ -9,37 +9,26 @@ public class Main {
         new InputStreamReader(System.in)
     );
 
-
     public static void main(String[] args) throws IOException {
         StringTokenizer tokenizer = new StringTokenizer(br.readLine());
 
         int M = Integer.parseInt(tokenizer.nextToken());
         int N = Integer.parseInt(tokenizer.nextToken());
 
-        int[] primeArray = new int[N];
-        int prime_count = 0;
+        boolean[] primeArray = new boolean[N + 1];  // false : prime number
+        primeArray[0] = primeArray[1] = true;
 
-        for (int number = 2; number <= N; number++) {
+        for (int i = 2; i <= N; i++) {
+            if (primeArray[i])  continue;
 
-            boolean flag = true;
-            for (int i = 0; i < prime_count; i++) {
-
-                if (primeArray[i] > Math.sqrt(number)) break;
-
-                else if (number % primeArray[i] == 0) {
-                    flag = false;
-                    break;
-                }
-                
-            }
-
-            if (flag)   primeArray[prime_count++] = number;
+            for (int j = 2 * i; j <= N; j += i) primeArray[j] = true;
         }
+        
+        
+        for (int i = 0; i <= N; i++) {
+            if (primeArray[i])  continue;
 
-        for (int i = 0; i < prime_count; i++) {
-            int value = primeArray[i];
-
-            if (M <= value && value <= N)   System.out.println(value);
+            if (M <= i && i <= N)   System.out.println(i);
         }
     }
 }
