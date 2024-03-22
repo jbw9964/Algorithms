@@ -9,6 +9,8 @@ public class Main {
         new InputStreamReader(System.in)
     );
 
+    private static StringBuilder sb = new StringBuilder();
+
     public static void main(String[] args) throws IOException {
         StringTokenizer tokenizer = new StringTokenizer(br.readLine());
 
@@ -21,14 +23,12 @@ public class Main {
         for (int i = 2; i <= N; i++) {
             if (primeArray[i])  continue;
 
+            if (M <= i)         sb.append(String.valueOf(i)).append("\n");
+
             for (int j = 2 * i; j <= N; j += i) primeArray[j] = true;
         }
         
         
-        for (int i = 0; i <= N; i++) {
-            if (primeArray[i])  continue;
-
-            if (M <= i && i <= N)   System.out.println(i);
-        }
+        System.out.println(sb.toString());
     }
 }
