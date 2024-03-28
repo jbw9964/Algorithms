@@ -1,6 +1,9 @@
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.rmi.UnexpectedException;
 import java.util.StringTokenizer;
 
@@ -9,6 +12,7 @@ public class Main {
     private static final BufferedReader br = new BufferedReader(
         new InputStreamReader(System.in)
     );
+
 
     public static void main(String[] args) throws IOException {
         LinkedListWithCursor<String> test = new LinkedListWithCursor<String>(br.readLine().split(""));
@@ -40,7 +44,7 @@ public class Main {
             }
         }
 
-        System.out.println(test.toString());
+        test.display();
     }
 }
 
@@ -161,5 +165,20 @@ class LinkedListWithCursor<T extends CharSequence> {
         }
 
         return sb.toString();
+    }
+
+    public void display() throws IOException {
+        BufferedWriter bw = new BufferedWriter(
+            new OutputStreamWriter(System.out)
+        );
+
+        Node current = nodeHead;
+
+        while (current != null) {
+            bw.write(String.valueOf(current.getData()));
+            current = current.next;
+        }
+
+        bw.flush();
     }
 }
