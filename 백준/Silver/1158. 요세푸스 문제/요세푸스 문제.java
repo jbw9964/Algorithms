@@ -21,13 +21,16 @@ public class Main {
         for (int i = 1; i < K; i++)         deque.addLast(i);
         sb.append("<" + K);
 
-        for (int i = 1; i < N; i++) {
-            for (int j = 0; j < K - 1; j++) deque.addLast(deque.poll());
-            sb.append(", " + deque.poll());
+        if (!deque.isEmpty()) {
+            for (int i = 1; i < N - 1; i++) {
+                for (int j = 0; j < K - 1; j++) deque.addLast(deque.poll());
+                sb.append(", " + deque.poll());
+            }
+    
+            sb.append(", " + deque.getFirst());
         }
 
         sb.append(">\n");
-
         System.out.println(sb.toString());
     }
 }
