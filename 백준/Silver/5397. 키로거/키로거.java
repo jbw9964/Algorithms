@@ -89,14 +89,7 @@ class LinkedListWithCursor<T extends CharSequence> {
 
     public LinkedListWithCursor()           {}
     public LinkedListWithCursor(T[] array)  {
-
         for (int i = 0; i < array.length; i++)  this.push(array[i]);
-
-        // nodeCursor = nodeHead = new Node(array[0]);
-
-        // for (int i = 1; i < array.length; i++)  this.push(array[i]);
-    
-        // length = indexCursor = array.length;
     }
 
     public void moveCursorLeft() {
