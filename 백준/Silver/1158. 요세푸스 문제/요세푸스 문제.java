@@ -16,7 +16,7 @@ public class Main {
         int N = Integer.parseInt(input[0]);
         int K = Integer.parseInt(input[1]);
 
-        ArrayDeque<Integer> deque = new ArrayDeque<>();
+        ArrayDeque<Integer> deque = new ArrayDeque<>(N);
         for (int i = K + 1; i <= N; i++)    deque.addLast(i);
         for (int i = 1; i < K; i++)         deque.addLast(i);
         sb.append("<" + K);
