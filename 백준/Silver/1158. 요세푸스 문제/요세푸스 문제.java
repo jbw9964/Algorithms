@@ -21,12 +21,11 @@ public class Main {
         for (int i = 1; i < K; i++)         deque.addLast(i);
         sb.append("<" + K);
 
-        int count = 1;
-        while (!deque.isEmpty())    {
-            if (count++ % K != 0)   deque.addLast(deque.poll());
-            else                    sb.append(", " + deque.poll());
+        for (int i = 1; i < N; i++) {
+            for (int j = 0; j < K - 1; j++) deque.addLast(deque.poll());
+            sb.append(", " + deque.poll());
         }
-        
+
         sb.append(">\n");
 
         System.out.println(sb.toString());
