@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -37,11 +36,10 @@ public class Main {
                 hashMap.put(key, hashMap.getOrDefault(key, 0) + 1);
             }
 
-            Set<String> keySet = hashMap.keySet();
             int combinations = 1;
 
-            for (String key : keySet)
-            combinations *= hashMap.get(key) + 1;
+            for (int value : hashMap.values())
+            combinations *= value + 1;
 
             sb.append(--combinations + "\n");
             hashMap.clear();
