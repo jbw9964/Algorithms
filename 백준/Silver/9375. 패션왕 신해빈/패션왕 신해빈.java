@@ -22,11 +22,6 @@ public class Main {
 
             int N = Integer.parseInt(br.readLine());
 
-            if (N == 0) {
-                sb.append("0\n");
-                continue;
-            }
-
             for (int j = 0; j < N; j++) {
                 StringTokenizer tokenizer = new StringTokenizer(br.readLine());
 
