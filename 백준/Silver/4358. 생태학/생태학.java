@@ -19,11 +19,7 @@ public class Main {
         int count = 0;
         String lineInput;
         while ((lineInput = br.readLine()) != null) {
-            if (hashMap.containsKey(lineInput))
-            hashMap.put(lineInput, hashMap.get(lineInput) + 1);
-
-            else hashMap.put(lineInput, 1);
-
+            hashMap.put(lineInput, hashMap.getOrDefault(lineInput, 0) + 1);
             count++;
         }
 
