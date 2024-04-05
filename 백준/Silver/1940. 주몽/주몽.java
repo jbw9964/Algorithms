@@ -1,8 +1,8 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 public class Main {
 
@@ -18,19 +18,19 @@ public class Main {
         StringTokenizer tokenizer = new StringTokenizer(br.readLine());
 
         int[] array = new int[N];
-        TreeSet<Integer> treeSet = new TreeSet<>();
+        HashSet<Integer> hashSet = new HashSet<>();
 
         for (int i = 0; i < N; i++) {
             int num = Integer.parseInt(tokenizer.nextToken());
             array[i] = num;
-            treeSet.add(num);
+            hashSet.add(num);
         }
 
         int count = 0;
         for (int i = 0; i < N; i++) {
             int num = array[i];
 
-            if (treeSet.contains(target - num)) count++;
+            if (hashSet.contains(target - num)) count++;
         }
 
         System.out.println(count / 2);
