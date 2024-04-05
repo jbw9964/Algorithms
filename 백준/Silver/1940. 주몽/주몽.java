@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 public class Main {
 
@@ -13,19 +15,24 @@ public class Main {
         int N = Integer.parseInt(br.readLine());
         int target = Integer.parseInt(br.readLine());
 
-        String[] array = br.readLine().split(" ");
+        StringTokenizer tokenizer = new StringTokenizer(br.readLine());
 
-        int count = 0;
-        for (int i = 0; i < N - 1; i++) {
-            int num1 = Integer.parseInt(array[i]);
+        int[] array = new int[N];
+        TreeSet<Integer> treeSet = new TreeSet<>();
 
-                for (int j = i + 1; j < N; j++) {
-                    int num2 = Integer.parseInt(array[j]);
-
-                    if (num1 + num2 == target)  count++;
-            }
+        for (int i = 0; i < N; i++) {
+            int num = Integer.parseInt(tokenizer.nextToken());
+            array[i] = num;
+            treeSet.add(num);
         }
 
-        System.out.println(count);
+        int count = 0;
+        for (int i = 0; i < N; i++) {
+            int num = array[i];
+
+            if (treeSet.contains(target - num)) count++;
+        }
+
+        System.out.println(count / 2);
     }
 }
