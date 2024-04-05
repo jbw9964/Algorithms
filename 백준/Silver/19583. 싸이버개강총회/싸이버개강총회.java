@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 
 public class Main {
 
@@ -12,35 +13,33 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException, ParseException {
-        String[] inputArray = br.readLine().split(" ");
+        StringTokenizer tokenizer = new StringTokenizer(br.readLine());
 
         String Start, End, Close;
-        Start = inputArray[0];
-        End = inputArray[1];
-        Close = inputArray[2];
+        Start = tokenizer.nextToken();
+        End = tokenizer.nextToken();
+        Close = tokenizer.nextToken();
 
         HashMap<String, Boolean> hashMap = new HashMap<>();
 
         String inputString;
         while ((inputString = br.readLine()) != null) {
-            inputArray = inputString.split(" ");
+            tokenizer = new StringTokenizer(inputString);
 
-            String time = inputArray[0];
-            String id = inputArray[1];
+            String time = tokenizer.nextToken();
+            String id = tokenizer.nextToken();
 
-            if (time.compareTo(Start) <= 0)         {
-                if (hashMap.containsKey(id))        continue;
-                else                                hashMap.put(id, false);
-            }
+            if (time.compareTo(Start) <= 0)         hashMap.put(id, false);
             else if (time.compareTo(End) < 0)       continue;
             else if (time.compareTo(Close) <= 0)    {
-                if (hashMap.getOrDefault(id, true))     continue;
-                else                                    hashMap.put(id, true);
+                if (hashMap.containsKey(id))        hashMap.put(id, true);
             }
+            
+            else                                    break;
         }
 
         int count = 0;
-        for (String key : hashMap.keySet())     if (hashMap.get(key))   count++;
+        for (boolean attendance : hashMap.values()) if (attendance) count++;
 
         System.out.println(count);
     }
