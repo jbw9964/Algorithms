@@ -12,7 +12,7 @@ public class Main {
 
 
     public static void main (String[] args) throws IOException {
-        long N = Long.parseLong(br.readLine()) % 3_000_000;
+        long N = Long.parseLong(br.readLine()) % 1_500_000;
 
         int fn = 1;
 
