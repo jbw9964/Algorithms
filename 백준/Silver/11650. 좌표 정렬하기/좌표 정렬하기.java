@@ -40,7 +40,8 @@ public class Main {
             }
         });
 
-        for (Node node : array) sb.append(node).append("\n");
+        for (Node node : array)
+        sb.append(node.x + " " + node.y).append("\n");
 
         System.out.print(sb.toString());
     }
