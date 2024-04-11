@@ -17,18 +17,18 @@ public class Main {
         
         input();
 
-        int totalCost = 0;
+        long totalCost = 0;
         for (int i = 0; i < N - 1; i++) {
             int currentCost = costArray[i];
             int nextCost = costArray[i + 1];
             int dist = distArray[i];
 
-            totalCost += dist * currentCost;
+            totalCost += (long) dist * currentCost;
 
             if (nextCost > currentCost) costArray[i + 1] = currentCost;
         }
 
-        System.out.println(totalCost);
+        System.out.print(totalCost);
     }
 
     public static void input() throws IOException {
