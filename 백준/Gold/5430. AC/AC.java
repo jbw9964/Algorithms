@@ -1,8 +1,8 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.LinkedList;
 
 public class Main {
 
@@ -15,11 +15,12 @@ public class Main {
     public static void main (String[] args) throws IOException {
         int T = Integer.parseInt(br.readLine());
 
-        Deque<Integer> deque = new LinkedList<>();
-
         for (int i = 0; i < T; i++) {
             char[] commands = br.readLine().toCharArray();
-            br.readLine();
+
+            int cap = Integer.parseInt(br.readLine());
+            Deque<Integer> deque = new ArrayDeque<>(cap);
+
             String[] array = br.readLine().replace("[", "").replace("]", "").split(",");
             
             for (String value : array)  if (value.length() != 0)    deque.push(Integer.parseInt(value));
