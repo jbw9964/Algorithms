@@ -1,7 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
@@ -30,10 +30,9 @@ public class Main {
 
     public static void solve(int start, int target)  {
         int[] recordTable = new int[MOD];
-        recordTable[start] = start;
+        Arrays.fill(recordTable, -1);
 
-        HashSet<Integer> hashSet = new HashSet<>();
-        hashSet.add(start);
+        recordTable[start] = start;
 
         Queue<Integer> queue = new LinkedList<>();
         queue.add(start);
@@ -45,11 +44,10 @@ public class Main {
             int[] newNumbers = {D(current), S(current), L(current), R(current)};
             for (int num : newNumbers)  {
 
-                if (hashSet.contains(num))  continue;
+                if (recordTable[num] != -1)     continue;
 
                 recordTable[num] = current;
                 queue.add(num);
-                hashSet.add(num);
 
                 if (num == target)  break LOOP_FLAG;
             }
