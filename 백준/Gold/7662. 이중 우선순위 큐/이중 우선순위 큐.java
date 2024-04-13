@@ -38,7 +38,7 @@ public class Main {
                         else if (value == -1)   value = treeMap.firstKey();
                         else                    throw new UnexpectedException("Unexpected operation encountered");
 
-                        if (treeMap.get(value) > 1)     {treeMap.put(value, treeMap.get(value) - 1); continue;}
+                        if (treeMap.get(value) > 1)     treeMap.put(value, treeMap.get(value) - 1);
                         else                            treeMap.remove(value);
 
                         break;
