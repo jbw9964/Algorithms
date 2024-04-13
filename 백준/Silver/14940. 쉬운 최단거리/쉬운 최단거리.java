@@ -22,6 +22,7 @@ public class Main {
     }
 
     private static boolean[][] moveableTable;
+    private static boolean[][] visitTable;
     private static final Queue<Coord> queue = new LinkedList<>();
 
     public static void input() throws IOException {
@@ -31,6 +32,7 @@ public class Main {
         M = Integer.parseInt(line[1]);
 
         moveableTable = new boolean[N][M];
+        visitTable = new boolean[N][M];
 
         for (int i = 0; i < N; i++) {
             line = br.readLine().split(" ");
@@ -46,9 +48,12 @@ public class Main {
     public static void main(String[] args) throws IOException {
         input();
 
-        for (int[] row : BFS()) {
-            for (int dist : row)
-            sb.append(dist + " ");
+        int[][] table = BFS();
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++)
+            if (moveableTable[i][j] && !visitTable[i][j])   sb.append("-1 ");
+            else                                            sb.append(table[i][j] + " ");
             sb.append("\n");
         }
 
@@ -57,7 +62,6 @@ public class Main {
 
     public static int[][] BFS() {
         int[][] table = new int[N][M];
-        boolean[][] visitTable = new boolean[N][M];
 
         int[] dr = {0, 0, 1, -1};
         int[] dc = {1, -1, 0, 0};
@@ -82,13 +86,6 @@ public class Main {
                 queue.add(new Coord(r, c));
             }
         }
-
-        for (int i = 0; i < N; i++)
-        for (int j = 0; j < M; j++)
-        if (table[i][j] == 0 && moveableTable[i][j])
-        table[i][j] = -1;
-
-        table[init.r][init.c] = 0;
 
         return table;
     }
