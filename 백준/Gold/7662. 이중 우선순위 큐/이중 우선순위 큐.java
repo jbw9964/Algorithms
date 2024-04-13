@@ -2,9 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.UnexpectedException;
-import java.util.HashMap;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 public class Main {
 
@@ -17,8 +16,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         int T = Integer.parseInt(br.readLine());
-        TreeSet<Integer> treeSet = new TreeSet<>();
-        HashMap<Integer, Integer> hashMap = new HashMap<>();
+        TreeMap<Integer, Integer> treeMap = new TreeMap<>();
 
         while (T-- > 0) {
             int K = Integer.parseInt(br.readLine());
@@ -30,28 +28,27 @@ public class Main {
 
                 switch (operation) {
                     case "I" :
-                        if (hashMap.getOrDefault(value, 0) == 0)    treeSet.add(value);
-                        hashMap.put(value, hashMap.getOrDefault(value, 0) + 1);
+                        treeMap.put(value, treeMap.getOrDefault(value, 0) + 1);
                         break;
                 
                     case "D" : 
-                        if (treeSet.isEmpty())  continue;
+                        if (treeMap.isEmpty())  continue;
 
-                        if (value == 1)         value = treeSet.pollLast();
-                        else if (value == -1)   value = treeSet.pollFirst();
+                        if (value == 1)         value = treeMap.lastKey();
+                        else if (value == -1)   value = treeMap.firstKey();
                         else                    throw new UnexpectedException("Unexpected operation encountered");
 
-                        if (hashMap.get(value) > 1)    treeSet.add(value);
-                        hashMap.put(value, hashMap.get(value) - 1);
+                        if (treeMap.get(value) > 1)     {treeMap.put(value, treeMap.get(value) - 1); continue;}
+                        else                            treeMap.remove(value);
+
                         break;
 
                     default : throw new UnexpectedException("Unexpected operation encountered");
                 }
             }
 
-            sb.append(treeSet.isEmpty() ? "EMPTY" : treeSet.last() + " " + treeSet.first()).append("\n");
-            hashMap.clear();
-            treeSet.clear();
+            sb.append(treeMap.isEmpty() ? "EMPTY" : treeMap.lastKey() + " " + treeMap.firstKey()).append("\n");
+            treeMap.clear();
         }
         
         System.out.print(sb.toString());
