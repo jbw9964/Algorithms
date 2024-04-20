@@ -14,11 +14,6 @@ class Shark {
 
         public int getRow() {return this.r;}
         public int getCol() {return this.c;}
-
-        @Override
-        public String toString() {
-            return String.format("[%d, %d]", r, c);
-        }
     }
 
     static enum Direction   {
@@ -67,7 +62,19 @@ class Shark {
         }
     }
     public void moveShark(int R, int C) {
-        int count = speed;
+        int netMoveR = (speed) % (2 * R - 2);
+        int netMoveC = (speed) % (2 * C - 2);
+
+        int count = 0;
+
+        switch (dir) {
+            case UP :
+            case DOWN :     count = netMoveR;   break;
+        
+            case LEFT : 
+            case RIGHT :    count = netMoveC;   break;
+        }
+
         while (count-- > 0) {
 
             if (coord.r == 0 && dir == Direction.UP)        dir = Direction.DOWN;
@@ -81,11 +88,6 @@ class Shark {
 
     public int getSize()    {return this.size;}
     public Coord getCoord() {return this.coord;}
-
-    @Override
-    public String toString() {
-        return String.format("%d, %d", speed, size);
-    }
 }
 
 class SharkManager  {
@@ -158,19 +160,6 @@ class SharkManager  {
         }
 
         return size;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < R; i++) {
-            for (int j = 0; j < C; j++)
-            sb.append(sharkTable[i][j]).append("\t\t");
-            sb.append("\n");
-        }
-
-        return sb.toString();
     }
 }
 
