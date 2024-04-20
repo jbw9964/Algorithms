@@ -92,33 +92,25 @@ class SharkManager  {
     private int R, C;
 
     private Set<Shark> sharkSet;
-    private int capacity;
-    private int numOfSharks;
+    private Shark[][] sharkTable;
 
-    private Queue<Shark>[][] sharkTable;
-
-    @SuppressWarnings("unchecked")
     public SharkManager(int R, int C, int M)    {
         this.R = R;
         this.C = C;
-        this.capacity = M;
 
         sharkSet = new HashSet<>(2 * M);
-        sharkTable = new Queue[R][C];
+        sharkTable = new Shark[R][C];
     }
 
     public void addShark(int r, int c, int s, int d, int z) {
         Shark newShark = new Shark(r, c, s, d, z);
         sharkSet.add(newShark);
         
-        if (sharkTable[r][c] == null)   sharkTable[r][c] = new LinkedList<>();
-        sharkTable[r][c].add(newShark);
+        sharkTable[r][c] = newShark;
     }
 
-    
-    @SuppressWarnings("unchecked")
     public void moveShark() {
-        Queue<Shark>[][] newTable = new Queue[R][C];
+        Shark[][] newTable = new Shark[R][C];
 
         Queue<Shark> removalSharks = new LinkedList<>();
 
@@ -129,19 +121,13 @@ class SharkManager  {
             int r = coord.getRow();
             int c = coord.getCol();
 
-            if (newTable[r][c] == null)
-            newTable[r][c] = new LinkedList<>();
+            if (newTable[r][c] == null)     {newTable[r][c] = shark; continue;}
 
-            Queue<Shark> list = newTable[r][c];
-
-            if (list.isEmpty())     {list.add(shark); continue;}
-
-            Shark tempShark = list.poll();
-
+            Shark tempShark = newTable[r][c];
             Shark sharkToAppend = shark.getSize() > tempShark.getSize() ? shark : tempShark;
             Shark sharkToRemove = shark.getSize() < tempShark.getSize() ? shark : tempShark;
 
-            list.add(sharkToAppend);
+            newTable[r][c] = sharkToAppend;
             removalSharks.add(sharkToRemove);
         }
 
@@ -150,9 +136,7 @@ class SharkManager  {
         while (!removalSharks.isEmpty())    {
             Shark sharkToRemove = removalSharks.poll();
             sharkSet.remove(sharkToRemove);
-            numOfSharks -= 1;
         }
-
     }
 
     public int catchShark(int c)    {
@@ -160,11 +144,11 @@ class SharkManager  {
         int size = 0;
         
         for (int i = 0; i < R; i++) {
-            Queue<Shark> sharkList = sharkTable[i][c];
+            Shark closestShark = sharkTable[i][c];
 
-            if (sharkList == null)  continue;
-            
-            sharkToRemove = sharkList.poll();
+            if (closestShark == null)   continue;
+
+            sharkToRemove = closestShark;
             break;
         }
 
@@ -181,10 +165,8 @@ class SharkManager  {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < R; i++) {
-            for (int j = 0; j < C; j++) {
-                if (sharkTable[i][j] == null || sharkTable[i][j].size() == 0)   sb.append("None\t\t");
-                else                            sb.append(sharkTable[i][j]).append("\t\t");
-            }
+            for (int j = 0; j < C; j++)
+            sb.append(sharkTable[i][j]).append("\t\t");
             sb.append("\n");
         }
 
