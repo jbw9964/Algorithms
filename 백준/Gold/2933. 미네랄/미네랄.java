@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
-class Mineral   {
+class Mineral   {           // single Mineral
     int r, c;
     Mineral(int r, int c)   {
         this.r = r;
@@ -16,12 +16,14 @@ class Mineral   {
     public void moveDown()  {r += 1;}
 }
 
-class MineralManager    {
+class MineralManager    {       // manage many Minerals
     private int R, C;
-    private Mineral[][] mineralTable;
-    private int counter;
-    private static int[] dr = {0, 0, 1, -1};
-    private static int[] dc = {1, -1, 0, 0};
+    private int counter;        // counter to determine throw (left -> right) or (right -> left)
+
+    private Mineral[][] mineralTable;           // table for existing Minerals
+    private static int[] dr = {1, -1, 0, 0};
+    private static int[] dc = {0, 0, -1, 1};
+
     private boolean inRange(int r, int c)   {
         return 0 <= r && r < R && 0 <= c && c < C;
     }
@@ -32,6 +34,8 @@ class MineralManager    {
 
         mineralTable = new Mineral[R][C];
     }
+
+    // read table from buffer
     public void assignTable(BufferedReader br) throws IOException {
         for (int i = 0; i < R; i++) {
             char[] lineInput = br.readLine().toCharArray();
@@ -42,6 +46,7 @@ class MineralManager    {
         }
     }
 
+    // return most (left or right) Mineral
     private Mineral getRowMineral(int r)    {
         Mineral selection = null;
 
@@ -64,6 +69,8 @@ class MineralManager    {
         return selection;
     }
 
+    // return Queue that stores every falling Minerals, using BFS
+    // if selected cluster (initSearch) doesn't fall, return null
     private Queue<Mineral> getFallingCluster(Mineral initSearch) {
         boolean[][] visitTable = new boolean[R][C];
         visitTable[initSearch.r][initSearch.c] = true;
@@ -96,12 +103,14 @@ class MineralManager    {
         return cluster;
     }
 
+    // remove most (left or right) Mineral from table
+    // search falling cluster & drop it
     public void removeMineral(int r) {
-        Mineral removal = getRowMineral(r);
+        Mineral removal = getRowMineral(r);     // most (L-R) Mineral
         
-        if (removal == null)    return;
+        if (removal == null)    return;         // no Minerals to remove
 
-        mineralTable[removal.r][removal.c] = null;
+        mineralTable[removal.r][removal.c] = null;  // remove Mineral from table
 
         // System.out.println(this);
 
@@ -109,59 +118,64 @@ class MineralManager    {
         for (int i = 0; i < 4; i++) {
             if (!inRange(removal.r + dr[i], removal.c + dc[i]))     continue;
 
+            // selection adjacent Mineral from table
             Mineral adjacent = mineralTable[removal.r + dr[i]][removal.c + dc[i]];
             if (adjacent == null)       continue;
 
+            // check whether selected Minerals to fall
             fallingCluster = getFallingCluster(adjacent);
 
-            if (fallingCluster != null) {
-                dropCluster(fallingCluster);
+            if (fallingCluster != null) {       // selected Minerals should fall
+                dropCluster(fallingCluster);    // drop cluster
                 return;
             }
         }
     }
 
+    // drop selected cluster untill reached ground or other cluster
     private void dropCluster(Queue<Mineral> fallingCluster)  {
+        // most below Minerals in falling cluster
         Queue<Mineral> mostBottoMinerals = getMostDownMinerals(fallingCluster);
 
         boolean flag = false;
         do {
-            moveClusterDown(fallingCluster);
-            
-            // System.out.println(this);
+            moveClusterDown(fallingCluster);    // move cluster down
 
             for (Mineral mineral : mostBottoMinerals)   {
-                if (mineral.r == R - 1)                                 {flag = true; break;}
+                if (mineral.r == R - 1)                                 {flag = true; break;}   // cluster reached to bottom
                 else if (inRange(mineral.r + 1, mineral.c) 
-                    && mineralTable[mineral.r + 1][mineral.c] != null)  {flag = true; break;}
+                    && mineralTable[mineral.r + 1][mineral.c] != null)  {flag = true; break;}   // cluster reached to other cluster(Mineral)
             }
 
-        } while (!flag);
+        } while (!flag);    // loop untill cluster reach to bottom
     }
 
+    // return Queue that contains most bottom Minerals in given cluster
     private Queue<Mineral> getMostDownMinerals(Queue<Mineral> cluster)  {
         HashMap<Integer, Mineral> columnHashMap = new HashMap<>();
 
         for (Mineral mineral : cluster) {
             int column = mineral.c;
-            if (!columnHashMap.containsKey(column))   {
+            if (!columnHashMap.containsKey(column))   {     // no minima stored in current column
                 columnHashMap.put(column, mineral);
                 continue;
             }
 
             Mineral prev = columnHashMap.get(column);
 
-            if (mineral.r > prev.r)             columnHashMap.put(column, mineral);
+            // previous Mineral is above than current
+            if (mineral.r > prev.r)             columnHashMap.put(column, mineral);     // replace minima
         }
 
         Queue<Mineral> mostDownQueue = new LinkedList<>();
 
         for (Mineral mineral : columnHashMap.values())
-        mostDownQueue.add(mineral);
+        mostDownQueue.add(mineral);     // store minimas to Queue
 
         return mostDownQueue;
     }
 
+    // move cluster down & sync with table
     private void moveClusterDown(Queue<Mineral> cluster)    {
         for (Mineral mineral : cluster) {
             int r = mineral.r;
