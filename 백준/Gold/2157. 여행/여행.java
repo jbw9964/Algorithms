@@ -29,33 +29,32 @@ public class Main {
             int b = Integer.parseInt(tokenizer.nextToken());
             int c = Integer.parseInt(tokenizer.nextToken());
 
-            costTable[a][b] = costTable[a][b] < c ? c : costTable[a][b];
+            costTable[a][b] = Math.max(costTable[a][b], c);
         }
-
-        for (int i = 2; i <= N; i++)
-        DP[2][i] = costTable[1][i];
     }
     
     public static void main(String[] args) throws IOException {
         input();
 
-        for (int currentCity = 3; currentCity <= N; currentCity++)   {
-            for (int visit = 3; visit <= currentCity && visit <= M; visit++)    {
+        DP[2] = costTable[1];
+        for (int visited = 3; visited <= M; visited++)  {
+            for (int currentCity = visited; currentCity <= N; currentCity++)    {
 
-                for (int prevCity = visit - 1; prevCity < currentCity; prevCity++) {
-                    int costPrevToCurrent = costTable[prevCity][currentCity];
-                    int costSumToPrev = DP[visit - 1][prevCity];
+                for (int prevCity = 2; prevCity < currentCity; prevCity++)  {
 
-                    if (costPrevToCurrent == 0 || costSumToPrev == 0)      continue;
+                    int prevVisitCost = DP[visited - 1][prevCity];
+                    int prevToCurrentCost = costTable[prevCity][currentCity];
 
-                    DP[visit][currentCity] = Math.max(DP[visit][currentCity], costPrevToCurrent + costSumToPrev);
+                    if (prevVisitCost == 0 || prevToCurrentCost == 0)   continue;
+
+                    DP[visited][currentCity] = Math.max(DP[visited][currentCity], prevVisitCost + prevToCurrentCost);
                 }
             }
         }
 
         int maxima = 0;
-        for (int i = 1; i <= M; i++)
-        if (maxima < DP[i][N])  maxima = DP[i][N];
+        for (int visited = 2; visited <= M; visited++)
+        if (maxima < DP[visited][N])    maxima = DP[visited][N];
 
         System.out.print(maxima);
     }
