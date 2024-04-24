@@ -20,7 +20,7 @@ public class Main {
         K = Integer.parseInt(tokenizer.nextToken());
 
         costTable = new int[N + 1][N + 1];
-        DP = new int[M + 1][N + 1];
+        DP = new int[M + 1][N + 1];         // M by N matrix
 
         for (int i = 0; i < K; i++) {
             tokenizer = new StringTokenizer(br.readLine());
@@ -36,17 +36,20 @@ public class Main {
     public static void main(String[] args) throws IOException {
         input();
 
-        DP[2] = costTable[1];
+        DP[2] = costTable[1];       // copy costs that only visited 2 cities : (1 --> ?)
+
         for (int visited = 3; visited <= M; visited++)  {
             for (int currentCity = visited; currentCity <= N; currentCity++)    {
 
                 for (int prevCity = 2; prevCity < currentCity; prevCity++)  {
 
-                    int prevVisitCost = DP[visited - 1][prevCity];
-                    int prevToCurrentCost = costTable[prevCity][currentCity];
+                    int prevVisitCost = DP[visited - 1][prevCity];              // cost that visited (visited - 1) cities
+                    int prevToCurrentCost = costTable[prevCity][currentCity];   // cost of (visited - 1) to current city
 
-                    if (prevVisitCost == 0 || prevToCurrentCost == 0)   continue;
+                    // unavailable movement : (visited - 1) movement or (visited - 1) to current city movement is not allowed 
+                    if (prevVisitCost == 0 || prevToCurrentCost == 0)   continue;  
 
+                    // store maxima
                     DP[visited][currentCity] = Math.max(DP[visited][currentCity], prevVisitCost + prevToCurrentCost);
                 }
             }
@@ -54,7 +57,8 @@ public class Main {
 
         int maxima = 0;
         for (int visited = 2; visited <= M; visited++)
-        if (maxima < DP[visited][N])    maxima = DP[visited][N];
+        if (maxima < DP[visited][N])
+        maxima = DP[visited][N];
 
         System.out.print(maxima);
     }
