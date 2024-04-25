@@ -26,8 +26,13 @@ public class Main {
             int n = Integer.parseInt(br.readLine());
 
             while (cursor < n)  {
-                tableOdd[++cursor] = (tableEven[cursor - 1] + tableEven[cursor - 2] + tableEven[cursor - 3]) % MOD;
-                tableEven[cursor] = (tableOdd[cursor - 1] + tableOdd[cursor - 2] + tableOdd[cursor - 3]) % MOD;
+                tableOdd[++cursor] = (
+                    tableEven[cursor - 1] + tableEven[cursor - 2] + tableEven[cursor - 3]
+                ) % MOD;
+                
+                tableEven[cursor] = (
+                    tableOdd[cursor - 1] + tableOdd[cursor - 2] + tableOdd[cursor - 3]
+                ) % MOD;
             }
 
             sb.append(tableOdd[n] + " " + tableEven[n]).append("\n");  
