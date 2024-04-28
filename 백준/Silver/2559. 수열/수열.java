@@ -8,27 +8,40 @@ public class Main {
         new InputStreamReader(System.in)
     );
 
+    private static int N, K;
+    private static int[] array;
+
     public static void main(String[] args) throws IOException {
+        input();
+
+        int initSum = 0;
+        int index = 0;
+        while (index < K)
+        initSum += array[index++];
+
+        int maxima = Integer.MIN_VALUE;
+
+        while (index < N)   {
+            if (maxima < initSum)   maxima = initSum;
+
+            initSum += array[index];
+            initSum -= array[index++ - K];
+        }
+
+        if (maxima < initSum)   maxima = initSum;
+
+        System.out.println(maxima);
+    }
+
+    private static void input() throws IOException  {
         StringTokenizer tokenizer = new StringTokenizer(br.readLine());
 
-        int N = Integer.parseInt(tokenizer.nextToken());
-        int K = Integer.parseInt(tokenizer.nextToken());
+        N = Integer.parseInt(tokenizer.nextToken());
+        K = Integer.parseInt(tokenizer.nextToken());
 
-        int[] array = new int[N];
+        array = new int[N];
         tokenizer = new StringTokenizer(br.readLine());
         for (int i = 0; i < N; i++)
         array[i] = Integer.parseInt(tokenizer.nextToken());
-
-        int maxima = Integer.MIN_VALUE;
-        for (int i = 0; i <= N - K; i++) {
-            int sum = 0;
-
-            for (int j = i; j < i + K; j++)
-            sum += array[j];
-            
-            if (maxima < sum)   maxima = sum;
-        }
-
-        System.out.println(maxima);
     }
 }
