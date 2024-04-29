@@ -19,10 +19,10 @@ public class Main {
         nCr = new int[30][30];
 
         for (int n = 1; n < 30; n++)    {
-            for (int r = 0; r <= n; r++)    {
+            for (int r = 1; r <= n; r++)    {
                 int value;
 
-                if (r == 0 || r == n)           value = 1;
+                if (r == n)                     value = 1;
                 else if (r == 1 || r == n - 1)  value = n;
                 else                            value = nCr[n - 1][r - 1] + nCr[n - 1][r];
 
