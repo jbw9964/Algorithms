@@ -33,8 +33,8 @@ class Solution {
                 if (cursor <= 5)    
                 break;
 
-                index += cursor;
-                cursor = 0;
+                // index += cursor;
+                // cursor = 0;
             }
 
             head = file.substring(0, index);
