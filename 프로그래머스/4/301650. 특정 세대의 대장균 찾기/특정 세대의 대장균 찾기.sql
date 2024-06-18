@@ -1,0 +1,23 @@
+WITH GEN1_TABLE AS (
+    SELECT ID FROM ECOLI_DATA
+    WHERE PARENT_ID IS NULL
+)
+
+,   GEN2_TABLE AS (
+    SELECT
+            A.ID
+        # ,   B.ID    AS `PARENT_ID`
+    FROM    ECOLI_DATA  AS A
+    JOIN    GEN1_TABLE  AS B
+            ON A.PARENT_ID = B.ID
+)
+
+SELECT 
+        A.ID
+    # ,   B.ID    AS `PARENT_ID`
+FROM    ECOLI_DATA  AS A
+JOIN    GEN2_TABLE  AS B
+        ON A.PARENT_ID = B.ID
+
+ORDER
+BY      A.ID
