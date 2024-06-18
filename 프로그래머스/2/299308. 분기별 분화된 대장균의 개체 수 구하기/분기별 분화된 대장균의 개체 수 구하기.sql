@@ -1,0 +1,12 @@
+SELECT
+         CONCAT(((MONTH(DIFFERENTIATION_DATE) - 1) DIV 3) + 1, 'Q')  
+         AS `QUARTER`
+    # ,   ID
+    ,   COUNT(*)     AS `ECOLI_COUNT`
+FROM    ECOLI_DATA
+
+GROUP
+BY      `QUARTER`
+
+ORDER
+BY      `QUARTER`
