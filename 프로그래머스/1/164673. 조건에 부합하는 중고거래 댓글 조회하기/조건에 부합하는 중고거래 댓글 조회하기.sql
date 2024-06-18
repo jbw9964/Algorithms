@@ -1,0 +1,27 @@
+WITH BOARD_TABLE AS (
+    SELECT
+            TITLE
+        ,   BOARD_ID
+        ,   WRITER_ID
+        # ,   CREATED_DATE
+    FROM    USED_GOODS_BOARD
+
+    WHERE   YEAR(CREATED_DATE) = 2022
+    AND     MONTH(CREATED_DATE) = 10
+)
+
+# SELECT * FROM BOARD_TABLE
+
+SELECT  
+        A.TITLE
+    ,   A.BOARD_ID
+    ,   B.REPLY_ID
+    ,   B.WRITER_ID
+    ,   B.CONTENTS
+    ,   DATE_FORMAT(B.CREATED_DATE, '%Y-%m-%d') AS `CREATED_DATE`
+FROM    BOARD_TABLE         AS A
+JOIN    USED_GOODS_REPLY    AS B
+        ON A.BOARD_ID = B.BOARD_ID
+        
+ORDER
+BY      `CREATED_DATE`, A.TITLE
