@@ -11,7 +11,12 @@ public class Solution {
             uniqueNumbers.add(num);
             prev = num;
         }
+
+        int[] answer = new int[uniqueNumbers.size()];
+
+        for (int i = 0; i < answer.length; i++)
+        answer[i] = uniqueNumbers.remove(0);
         
-        return uniqueNumbers.stream().mapToInt(val -> val).toArray();
+        return answer;
     }
 }
