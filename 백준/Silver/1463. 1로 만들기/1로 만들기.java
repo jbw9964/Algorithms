@@ -38,22 +38,14 @@ public class Main {
                 return;
             }
 
-            if (curr.num % 3 == 0 &&
-                !visited.contains(curr.num / 3))    {
+            if (curr.num % 3 == 0 && visited.add(curr.num / 3))
                 queue.add(new Node(curr.num / 3, curr.count + 1));
-                visited.add(curr.num / 3);
-            }
 
-            if (curr.num % 2 == 0 &&
-                !visited.contains(curr.num / 2))    {
+            if (curr.num % 2 == 0 && visited.add(curr.num / 2))
                 queue.add(new Node(curr.num / 2, curr.count + 1));
-                visited.add(curr.num / 2);
-            }
 
-            if (!visited.contains(curr.num - 1))    {
+            if (visited.add(curr.num - 1))
                 queue.add(new Node(curr.num - 1, curr.count + 1));
-                visited.add(curr.num - 1);
-            }
         }
     }
 }
