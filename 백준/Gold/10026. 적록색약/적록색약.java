@@ -38,8 +38,8 @@ public class Main {
                 if (visited[i][j])      continue;
 
                 normalCount++;
-                BFS(visited, new Coord(i, j), (c1, c2) -> c1 == c2);
-                // DFS(visited, new Coord(i, j), (c1, c2) -> c1 == c2);
+                // BFS(visited, new Coord(i, j), (c1, c2) -> c1 == c2);
+                DFS(visited, new Coord(i, j), (c1, c2) -> c1 == c2);
             }
 
         visited = new boolean[N][N];
@@ -49,8 +49,8 @@ public class Main {
                 if (visited[i][j]) continue;
 
                 blindCount++;
-                BFS(visited, new Coord(i, j), RGBlindness);
-                // DFS(visited, new Coord(i, j), RGBlindness);
+                // BFS(visited, new Coord(i, j), RGBlindness);
+                DFS(visited, new Coord(i, j), RGBlindness);
             }
 
         System.out.println(normalCount + " " + blindCount);
