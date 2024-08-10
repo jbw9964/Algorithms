@@ -29,8 +29,8 @@ public class Main {
             for (int r = 0; r < N; r++)
                 for (int c = 0; c < N; c++)
                     if (!visited[r][c] && arr[r][c] > level) {
-                        BFS(visited, new Coord(r, c), level);
-                        // DFS(visited, new Coord(r, c), level);
+                        // BFS(visited, new Coord(r, c), level);
+                        DFS(visited, new Coord(r, c), level);
                         count++;
                     }
 
