@@ -22,6 +22,13 @@ public class Main {
 
         int answer = 1;
 
+        List<Integer> levelList = new ArrayList<>(distinctLevels);
+        levelList.sort(Integer::compareTo);
+        
+        while (levelList.size() > 1)    {
+            int level = levelList.remove(0);
+        }
+        
         for (int level : distinctLevels) {
             int count = 0;
 
