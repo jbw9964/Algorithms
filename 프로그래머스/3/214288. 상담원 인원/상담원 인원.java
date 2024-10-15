@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -8,14 +9,17 @@ import java.util.stream.IntStream;
 
 public class Solution {
 
+    private static int MINIMUM_WAITING = Integer.MAX_VALUE;
+
     @SuppressWarnings("unchecked")
     private static final List<int[]>[] requestArray = new List[5];
 
-    private static final Map<List<int[]>, Integer[]> cachedEstimatedTimes
+    private static final Map<List<int[]>, Integer[]> watingTimeCacheMap
             = new HashMap<>();
 
     private void init(int numOfCouncilType, int[][] reqs) {
 
+        // 배열 초기화
         for (int i = 0; i < numOfCouncilType; i++) {
             requestArray[i] = new LinkedList<>();
         }
@@ -27,82 +31,87 @@ public class Solution {
             requestArray[councilType - 1].add(req);
         }
 
-        // 중복 계산 빠르게 하려고 cache 개체 추가
-
-        for (List<int[]> req : requestArray)    {
-            cachedEstimatedTimes.put(req, new Integer[20 + 1]);
+        // 기다리는 시간 cache 하는 객체 만듬
+        // (요청, 할당된 상담원 수) 에 따른 cacheMap
+        for (List<int[]> req : requestArray) {
+            // cacheMap 초기화
+            watingTimeCacheMap.put(req, new Integer[20]);
         }
     }
 
     public int solution(int k, int n, int[][] reqs) {
+        // 요청 분류, cache map 초기화
         init(k, reqs);
 
-        return switch (k) {
-            case 1 -> greedySearch(n, 1);
-            case 2 -> greedySearch(n, 1, 1);
-            case 3 -> greedySearch(n, 1, 1, 1);
-            case 4 -> greedySearch(n, 1, 1, 1, 1);
-            case 5 -> greedySearch(n, 1, 1, 1, 1, 1);
-            default -> throw new IllegalArgumentException();
-        };
+        // 완전 탐색 진행
+        compSearch(n, 0, new int[k]);
+
+        return MINIMUM_WAITING;
     }
 
-    private int greedySearch(int n, int... allocated) {
+    // allocated : 타입 별 할당된 상담원 명수
+    private void compSearch(int n, int index, int[] allocated) {
 
-        // 할당된 상담원 수
-        int currentAllocated = allocated.length;
+        // 마지막 index 초과
+        if (index == allocated.length) {
 
-        while (currentAllocated < n) {
+            // 상담원 최대 할당 완료
+            if (Arrays.stream(allocated).sum() >= n) {
 
-            // 상담원을 추가 할당 시, 가장 이득인 상담 타입 index
-            int optimalIndex = -1;
-            int maximumDiff = Integer.MIN_VALUE;
+                // 할당된 상담원으로 기다리는 시간 estimate
+                int totalWaiting = IntStream.range(0, allocated.length)
+                        .map(i -> estimateWaiting(allocated[i], requestArray[i]))
+                        .sum();
 
-            for (int i = 0; i < allocated.length; i++) {
-
-                // 현 할당된 상담원으로 waiting 계산
-                int currentWaiting = estimateWaiting(allocated[i], requestArray[i]);
-
-                // 1 명 추가했을 때 waiting 계산
-                int next = estimateWaiting(allocated[i] + 1, requestArray[i]);
-
-                int diff = currentWaiting - next;
-
-                if (diff > maximumDiff) {
-                    optimalIndex = i;
-                    maximumDiff = diff;
-                }
+                MINIMUM_WAITING = Math.min(MINIMUM_WAITING, totalWaiting);
             }
 
-            // 가장 이득인 상담원 +1
-            allocated[optimalIndex]++;
+            // 아직 상담원 추가 할당 가능
 
-            currentAllocated++;
+            return;
         }
 
-        // 할당할 수 있는 모든 상담원 배치 완료
-        // 마지막 계산
-        return IntStream.range(0, allocated.length)
-                .map(i -> estimateWaiting(allocated[i], requestArray[i]))
-                .sum();
+        int prev = allocated[index];
+
+        // 지금 더 할당할 수 있느 상담원 수
+        int allocatableCouncils = n     // 전체 상담원 수
+                - (index == 0 ? 0 : Arrays.stream(allocated).limit(index).sum())
+                // 앞서 할당된 상담원 수 (-)
+                - (allocated.length - index - 1);   // 이후 상담 타입 별 1 명씩 필요하므로 그만큼 (-)
+
+        for (int councilNum = 1; councilNum <= allocatableCouncils; councilNum++) {
+
+            // 상담원 할당하기
+            allocated[index] = councilNum;
+
+            // 다음 타입 상담원 할당해보기
+            // 더 추가 할당될 수 있으면 estimateWaiting 호출 안됨
+            compSearch(n, index + 1, allocated);
+        }
+
+        // 할당되었던 상담원 복원
+        allocated[index] = prev;
     }
 
-    // 주어진 상담원 수와 상담 요청들로 waiting time 계산
+    // 한 상담 type 의 기다리는 시간 측정
     private int estimateWaiting(int councilNum, final List<int[]> requests) {
 
-        assert councilNum >= 1;
-
-        // 이전 캐쉬된 계산 있으면 return
-        if (isCached(councilNum, requests)) {
-            return getCachedTime(councilNum, requests);
+        if (requests == null) { // 혹시 몰라 추가
+            return 0;
         }
 
+        assert councilNum >= 1;
         int totalWaiting = 0;
+
+        // 이전 cache 된 값이 있으면 바로 return
+        if (isCached(requests, councilNum)) {
+            return getCachedWaitingTime(requests, councilNum);
+        }
 
         // r[0] : 상담 시작한 시간
         // r[1] : 상담 duration
         // r[2] : 상담 타입
-        // 가장 빨리 끝나는 순으로 힙정렬 정의
+        // 가장 빨리 끝나는 순으로 정렬
         PriorityQueue<int[]> inProcess = new PriorityQueue<>(
                 Comparator.comparingInt(r -> (r[0] + r[1]))
         );
@@ -125,10 +134,8 @@ public class Solution {
                 // 요청 시간 & 끝나는 시간만큼 기다리니까
                 // req[0], 전체 기다림 +=
                 if (fastestEnd > req[0]) {
-
-                    // 디버깅 해보니 배열 값 자체를 바꿔서 다음 search 에도 영향 줌.
+                    req = req.clone();  // 디버깅 해보니 배열 값 자체를 바꿔서 다음 search 에도 영향 줌.
                     // 귀찮아서 clone
-                    req = req.clone();
 
                     int waiting = fastestEnd - req[0];
                     req[0] += waiting;
@@ -140,21 +147,37 @@ public class Solution {
             inProcess.add(req);
         }
 
-        // (상담요청, 할당된 상담원 수) 로 waiting time cache
-        recordCache(totalWaiting, councilNum, requests);
+        // 계산 값 cache 저장
+        cacheCalculation(totalWaiting, requests, councilNum);
 
         return totalWaiting;
     }
 
-    private boolean isCached(int councilNum, final List<int[]> requests) {
-        return cachedEstimatedTimes.get(requests)[councilNum] != null;
+    private boolean isCached(final List<int[]> requests, final int councilNum) {
+        return watingTimeCacheMap.get(requests)[councilNum] != null;
     }
 
-    private int getCachedTime(int councilNum, final List<int[]> requests) {
-        return cachedEstimatedTimes.get(requests)[councilNum];
+    private int getCachedWaitingTime(final List<int[]> requests, final int councilNum) {
+        return watingTimeCacheMap.get(requests)[councilNum];
     }
 
-    private void recordCache(int time, int councilNum, final List<int[]> requests) {
-        cachedEstimatedTimes.get(requests)[councilNum] = time;
+    private void cacheCalculation(final int waiting, final List<int[]> requests,
+            final int councilNum) {
+        watingTimeCacheMap.get(requests)[councilNum] = waiting;
     }
 }
+
+/*
+ *  상담원 최대 20 명
+ *  [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o] [o]
+ *
+ * 위 상담원을 최대 5 상담 타입으로 분류해야 함.
+ *
+ * 즉, 상담원 사이 빈 공간 19 곳 중 구분자 || 를 4 곳에 선택해 분류하면 됨. (아래처럼)
+ * 어떤 상담원이 어느 타입 상담을 배정받는지 안 따져도 되기 때문에 가능
+ *
+ * [o] [o] [o] [o]  |   [o] [o] [o] |   [o] [o] [o] [o] |   [o] [o] [o] [o] [o] [o] |   [o] [o] [o]
+ *
+ * --> 19C4 = (19 * 18 * 17 * 16) / 4! = 3876
+ * --> 3876 * (300 *  20log20) <= 3.3천만, 최악의 최악의 최악이므로 시간초과 안될듯?
+ */
