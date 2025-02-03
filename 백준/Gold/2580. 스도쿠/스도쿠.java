@@ -7,7 +7,7 @@ public class Main {
             new InputStreamReader(System.in)
     );
 
-    private static final Stack<Cord> targets = new Stack<>();
+    private static final List<Cord> targets = new ArrayList<>();
     private static final int[][] table = new int[9][9];
 
     public static void main(String[] args) throws IOException {
@@ -22,36 +22,34 @@ public class Main {
                 table[i][j] = value;
 
                 if (value == 0) {
-                    targets.push(new Cord(i, j));
+                    targets.add(new Cord(i, j));
                 }
             }
         }
 
         if (!targets.isEmpty()) {
-            dfs();
+            dfs(0);
         }
     }
 
-    private static void dfs() {
+    private static void dfs(int idx) {
 
-        if (targets.isEmpty()) {
+        if (idx >= targets.size()) {
             showTable();
             System.exit(0);
         }
 
-        Cord current = targets.pop();
+        Cord current = targets.get(idx);
 
         for (int trial = 1; trial <= 9; trial++) {
             table[current.r][current.c] = trial;
 
             if (isValid(current.r, current.c)) {
-                dfs();
+                dfs(idx + 1);
             }
 
             table[current.r][current.c] = 0;
         }
-
-        targets.push(current);
     }
 
     private static boolean isValid(int r, int c) {
