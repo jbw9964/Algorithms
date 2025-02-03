@@ -1,56 +1,65 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.StringTokenizer;
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-    private static class Info {
-        int time, cost;
-        Info(int time, int cost)    {
-            this.time = time;
-            this.cost = cost;
-        }
-    }
 
-    private static Info[] infos;
-    private static int maxProfit;
-
-    private static BufferedReader br = new BufferedReader(
-        new InputStreamReader(System.in)
+    private static final BufferedReader br = new BufferedReader(
+            new InputStreamReader(System.in)
     );
-    
+
 
     public static void main(String[] args) throws IOException {
-        int N = Integer.parseInt(br.readLine());
 
-        infos = new Info[N];
-        for (int i = 0; i < N; i++) {
-            StringTokenizer tokenizer = new StringTokenizer(br.readLine());
+        int n = Integer.parseInt(br.readLine());
 
-            infos[i] = new Info(
-                Integer.parseInt(tokenizer.nextToken()), 
-                Integer.parseInt(tokenizer.nextToken())
-            );
+        int[] times = new int[n + 1];
+        int[] costs = new int[n + 1];
+
+        for (int i = 1; i <= n; i++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+
+            times[i] = Integer.parseInt(st.nextToken());
+            costs[i] = Integer.parseInt(st.nextToken());
         }
 
-        compSearch(0, 0);
+        // System.out.println();
 
-        System.out.println(maxProfit);
+        int[][] dp = new int[n + 1][n + 1];
+
+        for (int i = 1; i <= n; i++) {
+
+            // init
+            int cost = costs[i];
+            int time = times[i];
+            for (int j = i + time - 1; j <= n; j++) {
+                dp[i][j] = cost;
+            }
+
+            // init upper columns [j, i]
+            for (int j = i - 1; j >= 1; j--) {
+
+                int maxima = dp[j][i];
+
+                // [j, k]
+                for (int k = j; k < i; k++) {
+
+                    int costFront = dp[j][k];
+                    int costRear = dp[k + 1][i];
+
+                    maxima = Math.max(maxima, costFront + costRear);
+                }
+
+                dp[j][i] = maxima;
+            }
+
+            // showArr(dp);
+        }
+
+        System.out.println(dp[1][n]);
     }
 
-    public static void compSearch(int index, int cost) {
-        if (index >= infos.length)  {
-            if (maxProfit < cost)   maxProfit = cost;
-            return;
-        }
-
-        Info current = infos[index];
-
-        for (int i = index + current.time; i <= infos.length; i++)
-        compSearch(i, cost + current.cost);
-
-        compSearch(index + 1, cost);
-
-        return;
+    private static void showArr(int[][] arr) {
+        Arrays.stream(arr).forEach(r -> System.out.println(Arrays.toString(r)));
+        System.out.println();
     }
 }
