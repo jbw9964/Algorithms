@@ -16,15 +16,15 @@ public class Main {
         int N = Integer.parseInt(st.nextToken());
         int M = Integer.parseInt(st.nextToken());
 
-        dfs(new ArrayList<>(N), N, M);
+        dfs(new int[M], N, M, 0);
 
         System.out.println(sb.toString());
     }
 
 
-    private static void dfs(List<Integer> arr, int n, int m)    {
+    private static void dfs(int[] arr, int n, int m, int index) {
 
-        if (arr.size() == m)    {
+        if (index == m) {
             for (int val : arr) {
                 sb.append(val).append(" ");
             }
@@ -32,12 +32,19 @@ public class Main {
             return;
         }
 
-        for (int i = 1; i <= n; i++) {
-            if (!arr.contains(i))    {
-                arr.add(i);
-                dfs(arr, n, m );
-                arr.remove(arr.size() - 1);
+        LOOP:
+        for (int trial = 1; trial <= n; trial++) {
+
+            for (int j = 0; j < index; j++) {
+                if (arr[j] == trial) {
+                    continue LOOP;
+                }
             }
+
+            int prev = arr[index];
+            arr[index] = trial;
+            dfs(arr, n, m, index + 1);
+            arr[index] = prev;
         }
     }
 }
