@@ -36,47 +36,44 @@ public class Main {
 
         init();
 
-        long answer = getMSTCost().stream()
-                .mapToLong(e -> e.cost)
-                .sum();
+        long answer = getMSTCost();
 
         System.out.println(answer);
     }
 
 
-    private static List<Edge> getMSTCost() {
+    private static long getMSTCost() {
+        long cost = 0L;
+        int count = 0;
 
-        List<Edge> mstEdges = new ArrayList<>(N - 1);
 
         for (Edge minima : edges) {
 
             int v1 = minima.v1;
             int v2 = minima.v2;
 
-            int p1 = findRootParent(v1);
-            int p2 = findRootParent(v2);
+            int p1 = findAndUpdateParent(v1);
+            int p2 = findAndUpdateParent(v2);
 
             if (p1 == p2) {
                 continue;
             }
 
-            int root = Math.min(p1, p2);
-            int childRoot = Math.max(p1, p2);
+            parents[p1] = p2;
 
-            parents[childRoot] = root;
+            cost += minima.cost;
+            count++;
 
-            mstEdges.add(minima);
-
-            if (mstEdges.size() >= N - 1) {
+            if (count >= N - 1) {
                 break;
             }
         }
 
-        return mstEdges;
+        return cost;
     }
 
-    private static int findRootParent(int v) {
-        return v == parents[v] ? v : (parents[v] = findRootParent(parents[v]));
+    private static int findAndUpdateParent(int v) {
+        return v == parents[v] ? v : (parents[v] = findAndUpdateParent(parents[v]));
     }
 
     private static void showParents() {
