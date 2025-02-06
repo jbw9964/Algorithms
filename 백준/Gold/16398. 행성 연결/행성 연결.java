@@ -9,14 +9,14 @@ public class Main {
     );
 
     private static int N;
-    private static List<Edge> edges;
+    private static PriorityQueue<Edge> edges;
 
     private static int[] parents;
 
     private static void init() throws IOException {
         N = Integer.parseInt(br.readLine());
 
-        edges = new ArrayList<>(N * N / 2);
+        edges = new PriorityQueue<>(Math.max(N, N * N / 2));
         parents = IntStream.range(0, N + 1).toArray();
 
         for (int i = 0; i < N; i++) {
@@ -28,8 +28,6 @@ public class Main {
                 edges.add(new Edge(i + 1, j + 1, costs[j]));
             }
         }
-
-        edges.sort(Comparator.comparing(e -> e.cost));
     }
 
     public static void main(String[] args) throws IOException {
@@ -46,8 +44,8 @@ public class Main {
         long cost = 0L;
         int count = 0;
 
-
-        for (Edge minima : edges) {
+        while (!edges.isEmpty() && count < N - 1)    {
+            Edge minima = edges.poll();
 
             int v1 = minima.v1;
             int v2 = minima.v2;
@@ -63,10 +61,6 @@ public class Main {
 
             cost += minima.cost;
             count++;
-
-            if (count >= N - 1) {
-                break;
-            }
         }
 
         return cost;
@@ -81,7 +75,7 @@ public class Main {
     }
 }
 
-class Edge {
+class Edge implements Comparable<Edge> {
 
     int v1, v2;
     int cost;
@@ -99,5 +93,10 @@ class Edge {
                 ", v2=" + v2 +
                 ", cost=" + cost +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Edge o) {
+        return cost - o.cost;
     }
 }
