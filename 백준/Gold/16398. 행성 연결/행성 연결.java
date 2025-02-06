@@ -8,18 +8,16 @@ public class Main {
     );
 
     private static int N;
-    private static int[][] costs;
+    private static int[][] costTable;
 
     private static void init() throws IOException {
         N = Integer.parseInt(br.readLine());
-
-        costs = new int[N][N];
-
+        costTable = new int[N][N];
         for (int i = 0; i < N; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine());
 
             for (int j = 0; j < N; j++) {
-                costs[i][j] = Integer.parseInt(st.nextToken());
+                costTable[i][j] = Integer.parseInt(st.nextToken());
             }
         }
     }
@@ -28,49 +26,55 @@ public class Main {
 
         init();
 
-        long ans = getMstCost();
+        long ans = getMstCost(0);
 
         System.out.println(ans);
     }
 
-    private static long getMstCost() {
+    private static long getMstCost(int initIndex) {
 
         long cost = 0;
-        int mstSize = 0;
-
-        PriorityQueue<Edge> candidates = new PriorityQueue<>();
+        int cnt = 0;
 
         boolean[] visited = new boolean[N];
+        visited[initIndex] = true;
 
+        PriorityQueue<Edge> edgeCandidates = new PriorityQueue<>();
         int[] minimaEdgeCostCache = new int[N];
-        Arrays.fill(minimaEdgeCostCache, Integer.MAX_VALUE);
 
-        candidates.add(new Edge(0, 0));
+        // init candidates & edge cost cache
+        for (int i = 0; i < N; i++) {
+            int candidateCost = costTable[initIndex][i];
 
-        while (!candidates.isEmpty() && mstSize < N) {
+            if (i != initIndex) {
+                edgeCandidates.add(new Edge(i, candidateCost));
+                minimaEdgeCostCache[i] = candidateCost;
+            }
+        }
 
-            Edge cheapest = candidates.poll();
-            int newVertex = cheapest.index;
+        while (!edgeCandidates.isEmpty() && cnt < N - 1) {
+
+            Edge optimalEdge = edgeCandidates.poll();
+            int newVertex = optimalEdge.index;
 
             if (visited[newVertex]) {
                 continue;
             }
 
-            cost += cheapest.cost;
+            cost += optimalEdge.cost;
             visited[newVertex] = true;
-            mstSize++;
 
-            // add candidates from newVertex's neighbor
             for (int i = 0; i < N; i++) {
-                int candidateCost = costs[cheapest.index][i];
+                int candidateCost = costTable[newVertex][i];
 
-                // filter MST included neighbors
-                // add to candidates when cost is cheaper than cached
+                // add candidates who's cost is cheaper than cached
                 if (!visited[i] && i != newVertex &&
                         candidateCost < minimaEdgeCostCache[i]) {
-                    candidates.add(new Edge(i, candidateCost));
+                    edgeCandidates.add(new Edge(i, candidateCost));
                 }
             }
+
+            cnt++;
         }
 
         return cost;
