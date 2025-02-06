@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.*;
-import java.util.stream.*;
 
 public class Main {
 
@@ -9,23 +8,16 @@ public class Main {
     );
 
     private static int N;
-    private static PriorityQueue<Edge> edges;
-
-    private static int[] parents;
+    private static int[][] costTable;
 
     private static void init() throws IOException {
         N = Integer.parseInt(br.readLine());
-
-        edges = new PriorityQueue<>(Math.max(N, N * N / 2));
-        parents = IntStream.range(0, N + 1).toArray();
-
+        costTable = new int[N][N];
         for (int i = 0; i < N; i++) {
-            int[] costs = Arrays.stream(br.readLine().split(" "))
-                    .mapToInt(Integer::parseInt)
-                    .toArray();
+            StringTokenizer st = new StringTokenizer(br.readLine());
 
-            for (int j = i + 1; j < N; j++) {
-                edges.add(new Edge(i + 1, j + 1, costs[j]));
+            for (int j = 0; j < N; j++) {
+                costTable[i][j] = Integer.parseInt(st.nextToken());
             }
         }
     }
@@ -34,69 +26,79 @@ public class Main {
 
         init();
 
-        long answer = getMSTCost();
+        long ans = getMstCost(0);
 
-        System.out.println(answer);
+        System.out.println(ans);
     }
 
+    private static long getMstCost(int initIndex) {
 
-    private static long getMSTCost() {
-        long cost = 0L;
-        int count = 0;
+        long cost = 0;
+        int cnt = 0;
 
-        while (!edges.isEmpty() && count < N - 1)    {
-            Edge minima = edges.poll();
+        boolean[] visited = new boolean[N];
+        visited[initIndex] = true;
 
-            int v1 = minima.v1;
-            int v2 = minima.v2;
+        PriorityQueue<Edge> edgeCandidates = new PriorityQueue<>(
+                Comparator.comparing(e -> e.cost)
+        );
+        int[] minimaEdgeCostCache = new int[N];
 
-            int p1 = findAndUpdateParent(v1);
-            int p2 = findAndUpdateParent(v2);
+        // init candidates & edge cost cache
+        for (int i = 0; i < N; i++) {
+            int candidateCost = costTable[initIndex][i];
 
-            if (p1 == p2) {
+            if (i != initIndex) {
+                edgeCandidates.add(new Edge(initIndex, i, candidateCost));
+                minimaEdgeCostCache[i] = candidateCost;
+            }
+        }
+
+        while (!edgeCandidates.isEmpty() && cnt < N - 1) {
+
+            Edge optimalEdge = edgeCandidates.poll();
+            int newVertex = optimalEdge.v;
+
+            if (visited[newVertex]) {
                 continue;
             }
 
-            parents[p1] = p2;
+            cost += optimalEdge.cost;
+            visited[newVertex] = true;
 
-            cost += minima.cost;
-            count++;
+            for (int i = 0; i < N; i++) {
+                int candidateCost = costTable[optimalEdge.v][i];
+
+                // add candidates who's cost is cheaper than cached
+                if (!visited[i] && i != newVertex &&
+                        candidateCost < minimaEdgeCostCache[i]) {
+                    edgeCandidates.add(new Edge(newVertex, i, candidateCost));
+                }
+            }
+
+            cnt++;
         }
 
         return cost;
     }
-
-    private static int findAndUpdateParent(int v) {
-        return v == parents[v] ? v : (parents[v] = findAndUpdateParent(parents[v]));
-    }
-
-    private static void showParents() {
-        System.out.println(Arrays.toString(parents));
-    }
 }
 
-class Edge implements Comparable<Edge> {
+class Edge {
 
-    int v1, v2;
-    int cost;
+    int root, v, cost;
 
-    public Edge(int v1, int v2, int cost) {
-        this.v1 = v1;
-        this.v2 = v2;
+    public Edge(int root, int v, int cost) {
+        this.root = root;
+        this.v = v;
         this.cost = cost;
     }
 
     @Override
     public String toString() {
         return "Edge{" +
-                "v1=" + v1 +
-                ", v2=" + v2 +
+                "root=" + root +
+                ", v=" + v +
                 ", cost=" + cost +
                 '}';
-    }
-
-    @Override
-    public int compareTo(Edge o) {
-        return cost - o.cost;
     }
 }
