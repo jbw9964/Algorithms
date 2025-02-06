@@ -11,8 +11,6 @@ public class Main {
     private static int N;
     private static List<Edge> edges;
 
-    // if P is parents of v1, v2,
-    // parents[P] = parents[v1] = parents[v2] = P
     private static int[] parents;
 
     private static void init() throws IOException {
@@ -38,7 +36,7 @@ public class Main {
 
         init();
 
-        long answer = getMST().stream()
+        long answer = getMSTCost().stream()
                 .mapToLong(e -> e.cost)
                 .sum();
 
@@ -46,45 +44,30 @@ public class Main {
     }
 
 
-    private static List<Edge> getMST() {
+    private static List<Edge> getMSTCost() {
 
-        List<Edge> mstEdges = new ArrayList<>(Main.edges.size());
-        Map<Integer, List<Integer>> subTreeList = new HashMap<>();
+        List<Edge> mstEdges = new ArrayList<>(N - 1);
 
-        for (Edge minima : edges)   {
+        for (Edge minima : edges) {
 
             int v1 = minima.v1;
             int v2 = minima.v2;
 
-            int p1 = parents[v1];
-            int p2 = parents[v2];
+            int p1 = findRootParent(v1);
+            int p2 = findRootParent(v2);
 
-            if (p1 == p2)   {
+            if (p1 == p2) {
                 continue;
             }
 
             int root = Math.min(p1, p2);
             int childRoot = Math.max(p1, p2);
 
-            if (!subTreeList.containsKey(root)) {
-                subTreeList.put(root, new ArrayList<>());
-            }
-
-            List<Integer> rootSubTree = subTreeList.get(root);
-            List<Integer> childSubTree = subTreeList.get(childRoot);
-
-            rootSubTree.add(childRoot);
             parents[childRoot] = root;
-            
-            if (childSubTree != null) {
-                adjustParents(root, childSubTree);
-                subTreeList.remove(childRoot);
-                rootSubTree.addAll(childSubTree);
-            }
-            
+
             mstEdges.add(minima);
 
-            if (mstEdges.size() >= N - 1)   {
+            if (mstEdges.size() >= N - 1) {
                 break;
             }
         }
@@ -92,10 +75,8 @@ public class Main {
         return mstEdges;
     }
 
-    private static void adjustParents(int p, List<Integer> targets) {
-        for (int index : targets) {
-            parents[index] = p;
-        }
+    private static int findRootParent(int v) {
+        return v == parents[v] ? v : (parents[v] = findRootParent(parents[v]));
     }
 
     private static void showParents() {
