@@ -8,7 +8,6 @@ public class Main {
     );
 
     private static int R, C;
-    private static final int[] dr = {-1, 1, 0, 0}, dc = {0, 0, -1, 1};
     private static int[][] table;
     private static boolean[][] visited;
 
@@ -41,61 +40,28 @@ public class Main {
 
         for (int i = 0; i < R; i++) {
             for (int j = 0; j < C; j++) {
-
-                if (visited[i][j] || table[i][j] != 1) {
-                    continue;
+                if (table[i][j] == 1 && !visited[i][j]) {
+                    sizes.add(dfs(i, j));
                 }
-
-                sizes.add(bfs(i, j));
             }
         }
 
         sizes.sort(Integer::compareTo);
 
         System.out.println(sizes.size());
-        for (int size : sizes) {
+        for (int size : sizes)  {
             System.out.println(size);
         }
     }
 
-    private static int bfs(int initR, int initC) {
-
-        visited[initR][initC] = true;
-
-        Queue<Cord> queue = new LinkedList<>();
-        queue.add(new Cord(initR, initC));
-
-        int size = 1;
-
-        while ((!queue.isEmpty())) {
-
-            Cord cur = queue.poll();
-
-            for (int i = 0; i < dr.length; i++) {
-
-                int r = cur.r + dr[i];
-                int c = cur.c + dc[i];
-
-                if (!inRange(r, c) || table[r][c] != 1 || visited[r][c]) {
-                    continue;
-                }
-
-                visited[r][c] = true;
-                queue.add(new Cord(r, c));
-                size++;
-            }
+    private static int dfs(int r, int c) {
+        if (!inRange(r, c) || table[r][c] != 1 || visited[r][c]) {
+            return 0;
         }
 
-        return size;
-    }
-}
+        visited[r][c] = true;
 
-class Cord {
-
-    int r, c;
-
-    public Cord(int r, int c) {
-        this.r = r;
-        this.c = c;
+        return 1 + dfs(r + 1, c) + dfs(r - 1, c)
+                + dfs(r, c - 1) + dfs(r, c + 1);
     }
 }
