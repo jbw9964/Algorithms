@@ -35,21 +35,20 @@ public class Main {
 
     private static int bfs()    {
 
-        int ans = Integer.MAX_VALUE;
-
         boolean[][][] visited = new boolean[N * N][R][C];
 
-        Queue<Cord> queue = new LinkedList<>();
-        queue.add(new Cord(0, 0, 0));
+        PriorityQueue<Cord> pq = new PriorityQueue<>(
+                Comparator.comparingInt(c -> c.numOfBlacks)
+        );
+        pq.add(new Cord(0, 0, 0));
 
-        while (!queue.isEmpty()) {
+        while (!pq.isEmpty()) {
 
-            Cord curr = queue.poll();
+            Cord curr = pq.poll();
             int blacks = curr.numOfBlacks;
 
             if (curr.r == R - 1 && curr.c == C - 1) {
-                ans = Math.min(ans, blacks);
-                continue;
+                return blacks;
             }
 
             for (int i = 0; i < dr.length; i++) {
@@ -65,14 +64,14 @@ public class Main {
                 }
 
                 visited[blacks][r][c] = true;
-                queue.add(new Cord(
+                pq.add(new Cord(
                         r, c,
                         blacks + (table[r][c] == 1 ? 0 : 1)
                 ));
             }
         }
 
-        return ans;
+        throw new RuntimeException();
     }
 
     private static boolean hasVisited(boolean[][][] visited, int r, int c, int blacks) {
