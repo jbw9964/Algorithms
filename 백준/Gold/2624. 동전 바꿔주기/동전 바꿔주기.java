@@ -40,9 +40,9 @@ public class Main {
             int coinPrice = priceTable[i];
             int maxCoinNum = coinNumTable[i];
 
-            for (int price = T; price > 0; price--) {
+            for (int price = T; price >= coinPrice; price--) {
                 for (int n = 1; n <= maxCoinNum; n++) {
-                    
+
                     int prevPrice = price - coinPrice * n;
 
                     if (prevPrice < 0)  {
