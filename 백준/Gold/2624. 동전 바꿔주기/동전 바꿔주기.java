@@ -46,7 +46,7 @@ public class Main {
                     int prevPrice = price - coinPrice * n;
 
                     if (prevPrice < 0)  {
-                        continue;
+                        break;
                     }
 
                     numOfCasesInCost[price] += numOfCasesInCost[prevPrice];
