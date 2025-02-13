@@ -7,61 +7,62 @@ public class Main {
             new InputStreamReader(System.in)
     );
 
+    public static final int IN = 1, OUT = 0;
+
     public static void main(String[] args) throws IOException {
+
         int N = Integer.parseInt(br.readLine());
 
-        List<Info> infos = new ArrayList<>(N);
+        PriorityQueue<Point> pq = new PriorityQueue<>();
 
         for (int i = 0; i < N; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine());
+            st.nextToken();
 
-            int index = Integer.parseInt(st.nextToken());
             long start = Long.parseLong(st.nextToken());
             long end = Long.parseLong(st.nextToken());
 
-            infos.add(new Info(index, start, end));
+            pq.add(new Point(start, IN));
+            pq.add(new Point(end, OUT));
         }
 
-        // get latest-start lectures
-        infos.sort(Comparator.comparing(i -> i.start));
+        int maxima = 0, cnt = 0;
+        while (!pq.isEmpty()) {
+            Point curr = pq.poll();
 
-        // get first-end lectures
-        PriorityQueue<Info> pq = new PriorityQueue<>(Comparator.comparing(i -> i.end));
-
-        int ans = 0;
-        for (Info curr : infos) {
-
-            Info firstEnd = pq.peek();
-
-            if (firstEnd!=null && curr.start>=firstEnd.end)   {
-                pq.poll();
+            if (curr.type == IN) {
+                maxima = Math.max(maxima, ++cnt);
+            } else {
+                cnt--;
             }
-
-            pq.add(curr);
-            ans = Math.max(ans, pq.size());
         }
 
-        System.out.println(ans);
+        System.out.println(maxima);
     }
-
 }
 
-class Info {
-    int index;
-    long start, end;
+class Point implements Comparable<Point> {
 
-    public Info(int index, long start, long end) {
-        this.index = index;
-        this.start = start;
-        this.end = end;
+    long time;
+    int type;
+
+    public Point(long time, int type) {
+        this.time = time;
+        this.type = type;
+    }
+
+    // fastest & OUT first
+    @Override
+    public int compareTo(Point o) {
+        return time != o.time ? Long.compare(time, o.time) :
+                type - o.type;
     }
 
     @Override
     public String toString() {
-        return "Info{" +
-                "index=" + index +
-                ", start=" + start +
-                ", end=" + end +
+        return "Point{" +
+                "time=" + time +
+                ", type=" + (type == Main.IN ? "IN" : "OUT") +
                 '}';
     }
 }
