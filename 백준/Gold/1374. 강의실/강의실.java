@@ -7,8 +7,6 @@ public class Main {
             new InputStreamReader(System.in)
     );
 
-    public static final int IN = 1, OUT = 0;
-
     public static void main(String[] args) throws IOException {
 
         int N = Integer.parseInt(br.readLine());
@@ -22,15 +20,15 @@ public class Main {
             long start = Long.parseLong(st.nextToken());
             long end = Long.parseLong(st.nextToken());
 
-            pq.add(new Point(start, IN));
-            pq.add(new Point(end, OUT));
+            pq.add(new Point(start, Type.IN));
+            pq.add(new Point(end, Type.OUT));
         }
 
         int maxima = 0, cnt = 0;
         while (!pq.isEmpty()) {
             Point curr = pq.poll();
 
-            if (curr.type == IN) {
+            if (curr.type == Type.IN) {
                 maxima = Math.max(maxima, ++cnt);
             } else {
                 cnt--;
@@ -41,12 +39,16 @@ public class Main {
     }
 }
 
+enum Type {
+    IN, OUT
+}
+
 class Point implements Comparable<Point> {
 
     long time;
-    int type;
+    Type type;
 
-    public Point(long time, int type) {
+    public Point(long time, Type type) {
         this.time = time;
         this.type = type;
     }
@@ -55,14 +57,14 @@ class Point implements Comparable<Point> {
     @Override
     public int compareTo(Point o) {
         return time != o.time ? Long.compare(time, o.time) :
-                type - o.type;
+                type == Type.OUT ? -1 : 1;
     }
 
     @Override
     public String toString() {
         return "Point{" +
                 "time=" + time +
-                ", type=" + (type == Main.IN ? "IN" : "OUT") +
+                ", type=" + type +
                 '}';
     }
 }
