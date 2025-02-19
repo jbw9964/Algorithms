@@ -10,50 +10,57 @@ public class Main {
     public static void main(String[] args) throws IOException {
         int N = Integer.parseInt(br.readLine());
 
-        StringBuilder sb = new StringBuilder().append(br.readLine());
+        char[] letters = br.readLine().toCharArray();
 
-        char[] letters = sb.toString().toCharArray();
-        char[] reversed = sb.reverse().toString().toCharArray();
-
-        Object[][] parameters = {
-                {'R', letters}, {'B', letters},
-                {'R', reversed}, {'B', reversed},
-        };
-
-        int ans = Integer.MAX_VALUE;
-        for (Object[] param : parameters) {
-            ans = Math.min(
-                    ans, countMovingRight((char) param[0], (char[]) param[1])
-            );
-        }
-
-        System.out.println(ans);
+        System.out.println(Math.min(
+                inspectCnt('R', letters),
+                inspectCnt('B', letters)
+        ));
     }
 
-    private static int countMovingRight(char leftLetter, char[] letters) {
+    private static int inspectCnt(char leftBall, char[] balls) {
 
-        int index = 0, len = letters.length;
-        int cnt = 0;
+        int index = 0, len = balls.length;
+        for (char ball : balls) {
+            if (ball != leftBall) {
+                break;
+            }
+            index++;
+        }
+
+        int moveToRight = 0, moveToLeft = 0;
 
         while (index < len) {
 
-            if (letters[index] == leftLetter) {
-                index++;
+            char ball = balls[index];
+            int cnt = countSameBalls(index, balls);
+
+            if (ball == leftBall) {
+                moveToLeft += cnt;
+                index += cnt;
                 continue;
             }
 
-            int blockCnt = 1;
-            while (index + blockCnt < len && letters[index + blockCnt] != leftLetter) {
-                blockCnt++;
-            }
-
-            if (index + blockCnt < len) {
-                index += blockCnt;
-                cnt += blockCnt;
+            if (index + cnt < len) {
+                moveToRight += cnt;
+                index += cnt;
                 continue;
             }
 
             break;
+        }
+
+        return Math.min(moveToRight, moveToLeft);
+    }
+
+    private static int countSameBalls(int index, char[] balls)  {
+        int cnt = 0;
+
+        for (int i = index; i < balls.length; i++) {
+            if (balls[i] != balls[index]) {
+                break;
+            }
+            cnt++;
         }
 
         return cnt;
