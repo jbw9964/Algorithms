@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.*;
-import java.util.stream.*;
 
 public class Main {
 
@@ -14,38 +13,30 @@ public class Main {
                 .mapToInt(Integer::parseInt)
                 .toArray();
 
-        int first = numbers[0];
-        int last = numbers[numbers.length - 1];
 
         long[][] cntTable = new long[N - 1][21];
-        cntTable[0][first]++;
+        cntTable[0][numbers[0]]++;
 
         for (int i = 1; i < N - 1; i++) {
-            long[] prevCntRow = cntTable[i - 1];
-            List<Integer> indices = getIndices(prevCntRow);
+            int currentNum = numbers[i];
 
-            int currentNumber = numbers[i];
-            for (int val : indices) {
-                long prevCnt = cntTable[i - 1][val];
-
-                if (val + currentNumber <= 20) {
-                    cntTable[i][val + currentNumber] += prevCnt;
+            for (int num = 0; num <= 20; num++) {
+                long cnt = cntTable[i - 1][num];
+                if (cnt <= 0)   {
+                    continue;
                 }
-                if (val - currentNumber >= 0) {
-                    cntTable[i][val - currentNumber] += prevCnt;
+
+                if (num + currentNum <= 20) {
+                    cntTable[i][num + currentNum] += cnt;
+                }
+                if (num - currentNum >= 0) {
+                    cntTable[i][num - currentNum] += cnt;
                 }
             }
         }
 
-        long ans = cntTable[N - 2][last];
+        long ans = cntTable[N - 2][numbers[N - 1]];
         System.out.println(ans);
-    }
-
-    private static List<Integer> getIndices(long[] counts) {
-        return IntStream.range(0, counts.length)
-                .filter(i -> counts[i] > 0)
-                .boxed()
-                .collect(Collectors.toList());
     }
 
     private static void showRow(long[] row) {
