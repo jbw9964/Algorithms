@@ -30,11 +30,11 @@ public class Main {
             pq.add(new Edge(v1, v2, cost));
         }
 
-        int mstCost = getMstCost(pq);
+        int mstCost = getMstCostViaKruskal(pq);
         System.out.println(mstCost - MAX_COST);
     }
 
-    private static int getMstCost(Queue<Edge> edges) {
+    private static int getMstCostViaKruskal(Queue<Edge> edges) {
 
         int cost = 0;
         while (!edges.isEmpty()) {
