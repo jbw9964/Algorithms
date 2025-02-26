@@ -8,93 +8,93 @@ public class Main {
     );
 
     private static int N, M, X;
-    private static int[][] costTable;
+    private static int[][] costTable, reverseCostTable;
 
     private static void init() throws IOException {
         StringTokenizer st = new StringTokenizer(br.readLine());
 
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
-        X = Integer.parseInt(st.nextToken());
+        X = Integer.parseInt(st.nextToken()) - 1;
 
-        costTable = new int[N + 1][N + 1];
+        costTable = new int[N][N];
+        reverseCostTable = new int[N][N];
+
         for (int i = 0; i < M; i++) {
             st = new StringTokenizer(br.readLine());
 
-            int from = Integer.parseInt(st.nextToken());
-            int to = Integer.parseInt(st.nextToken());
+            int from = Integer.parseInt(st.nextToken()) - 1;
+            int to = Integer.parseInt(st.nextToken()) - 1;
             int cost = Integer.parseInt(st.nextToken());
 
             costTable[from][to] = cost;
+            reverseCostTable[to][from] = cost;
         }
     }
 
     public static void main(String[] args) throws IOException {
         init();
 
-        int maxima = Integer.MIN_VALUE;
-        for (int node = 1; node <= N; node++) {
-            int go = getMinimumCost(node, X);
-            int back = getMinimumCost(X, node);
+        int[] fromXToOthers = getMinCostArr(X, costTable);
+        int[] fromOthersToX = getMinCostArr(X, reverseCostTable);
 
-            maxima = Math.max(maxima, go + back);
+        int maxima = Integer.MIN_VALUE;
+        for (int i = 0; i < N; i++) {
+            maxima = Math.max(maxima, fromXToOthers[i] + fromOthersToX[i]);
         }
 
         System.out.println(maxima);
     }
 
-    private static int getMinimumCost(int from, int to) {
-        if (from == to) {
-            return 0;
-        }
+    private static int[] getMinCostArr(int from, int[][] costTable) {
 
-        int[] costCache = new int[N + 1];
-        Arrays.fill(costCache, Integer.MAX_VALUE);
+        boolean[] visited = new boolean[N];
 
-        boolean[] visited = new boolean[N + 1];
+        int[] result = new int[N];
+        Arrays.fill(result, Integer.MAX_VALUE);
 
-        PriorityQueue<EdgeInfo> edges = new PriorityQueue<>();
-        edges.add(new EdgeInfo(from, 0));
+        PriorityQueue<Edge> pq = new PriorityQueue<>();
+        pq.add(new Edge(from, 0));
 
-        while (!edges.isEmpty() && !visited[to]) {
+        while (!pq.isEmpty()) {
 
-            EdgeInfo optimal = edges.poll();
-            int dst = optimal.to;
+            Edge e = pq.poll();
+            int node = e.to;
 
-            if (visited[dst]) {
+            if (visited[node]) {
                 continue;
             }
 
-            visited[dst] = true;
-            costCache[dst] = optimal.cost;
+            visited[node] = true;
+            result[node] = e.cost;
 
-            int[] adjacentCosts = costTable[dst];
-            for (int adj = 1; adj <= N; adj++) {
-                int cost = adjacentCosts[adj];
+            int[] adjacentCosts = costTable[node];
+            for (int adj = 0; adj < N; adj++) {
 
-                if (visited[adj] || cost == 0 || cost + optimal.cost > costCache[adj]) {
+                int cost = adjacentCosts[adj] + e.cost;
+                if (visited[adj] || cost == e.cost || cost > result[adj]) {
                     continue;
                 }
-                
-                edges.add(new EdgeInfo(adj, cost + optimal.cost));
+
+                pq.add(new Edge(adj, cost));
             }
         }
 
-        return costCache[to];
+        return result;
     }
 }
 
-class EdgeInfo implements Comparable<EdgeInfo> {
+class Edge implements Comparable<Edge> {
 
     int to, cost;
 
-    public EdgeInfo(int to, int cost) {
+    public Edge(int to, int cost) {
         this.to = to;
         this.cost = cost;
     }
 
     @Override
-    public int compareTo(EdgeInfo o) {
+    public int compareTo(Edge o) {
         return cost - o.cost;
     }
 
