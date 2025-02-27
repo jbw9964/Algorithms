@@ -54,6 +54,11 @@ public class Main {
 
     private static String dfs() {
 
+        if (initPoint.r == R - 1 || initPoint.r == 0 ||
+                initPoint.c == C - 1 || initPoint.c == 0) {
+            return "1";
+        }
+
         boolean[][] visited = new boolean[R][C];
         visited[initPoint.r][initPoint.c] = true;
 
@@ -65,12 +70,7 @@ public class Main {
             Queue<Cord> nextQueue = new LinkedList<>();
 
             while (!queue.isEmpty()) {
-
                 Cord curr = queue.poll();
-
-                if (curr.r == R - 1 || curr.r == 0 || curr.c == C - 1 || curr.c == 0) {
-                    return String.valueOf(curr.min);
-                }
 
                 for (int i = 0; i < dr.length; i++) {
                     int r = curr.r + dr[i];
@@ -82,6 +82,10 @@ public class Main {
 
                     if (fireNearby(r, c)) {
                         continue;
+                    }
+
+                    if (r == R - 1 || r == 0 || c == C - 1 || c == 0) {
+                        return String.valueOf(curr.min + 1);
                     }
 
                     visited[r][c] = true;
