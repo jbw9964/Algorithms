@@ -39,7 +39,16 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         init();
-        dfs(1, 0);
+
+        boolean[] visited = new boolean[N + 1];
+        for (int node = 1; node <= N; node++) {
+
+            if (visited[node]) {
+                continue;
+            }
+
+            dfs(node, visited);
+        }
 
         StringBuilder sb = new StringBuilder();
         
@@ -49,19 +58,36 @@ public class Main {
         System.out.print(sb.toString());
     }
 
-    private static void dfs(int node, int parent)   {
+    private static void dfs(int initNode, boolean[] visited) {
 
-        if (parents[node] != 0) {
-            return;
-        }
+        visited[initNode] = true;
 
-        parents[node] = parent;
+        Queue<Edge> q = new LinkedList<>();
+        q.add(new Edge(0, initNode));
 
-        List<Edge> edges = adjacent[node];
+        while (!q.isEmpty()) {
 
-        if (edges != null) {
+            Edge e = q.poll();
+            int parent = e.from;
+            int curr = e.to;
+
+            parents[curr] = parent;
+
+            List<Edge> edges = adjacent[curr];
+
+            if (edges == null) {
+                continue;
+            }
+
             for (Edge edge : edges) {
-                dfs(edge.to, node);
+
+                int to = edge.to;
+                if (visited[to]) {
+                    continue;
+                }
+
+                visited[to] = true;
+                q.add(edge);
             }
         }
     }
