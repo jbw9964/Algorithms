@@ -62,9 +62,7 @@ public class Main {
 
     private static int bfs(List<Virus> initPoints)    {
 
-        PriorityQueue<Virus> pq = new PriorityQueue<>();
-        pq.addAll(initPoints);
-
+        PriorityQueue<Virus> pq = new PriorityQueue<>(initPoints);
         Virus curr;
 
         while ((curr = pq.poll()) != null && curr.time < S) {
