@@ -27,9 +27,9 @@ public class Main {
             int b = Integer.parseInt(st.nextToken());
             long p = Integer.parseInt(st.nextToken());
             long q = Integer.parseInt(st.nextToken());
-            long gcd = gcd(p, q);
-            p /= gcd;
-            q /= gcd;
+            //long gcd = gcd(p, q);
+            //p /= gcd;
+            //q /= gcd;
 
             if (values[a] == values[b] && values[a] == 0) {
                 values[a] = p;
