@@ -1,6 +1,9 @@
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.*;
 
+// Memory :  108 MB
+// Runtime : 73.14 ms
 class Solution {
 
     private int R, C;
@@ -13,6 +16,7 @@ class Solution {
     private char[][] table;
     private static final char OUTER = '/';
     private static final char EMPTY = ' ';
+    private static List<Cord> edgeCords;
 
     private void init(String[] storage) {
         R = storage.length;
@@ -22,6 +26,17 @@ class Solution {
         for (int i = 0; i < R; i++) {
             table[i] = storage[i].toCharArray();
         }
+
+        edgeCords = new ArrayList<>(2 * R + 2 * C - 4);
+        edgeCords.addAll(
+                IntStream.range(0, R * C)
+                        .filter(cnt -> {
+                            int nR = cnt / C, nC = cnt % C;
+                            return nR == 0 || nR == R - 1 || nC == 0 || nC == C - 1;
+                        })
+                        .mapToObj(cnt -> new Cord(cnt / C, cnt % C))
+                        .collect(Collectors.toList())
+        );
     }
 
     public int solution(String[] storage, String[] requests) {
@@ -87,22 +102,14 @@ class Solution {
         List<Cord> newOuterBlocks = new ArrayList<>();
         boolean[][] visited = new boolean[R][C];
 
-        for (int c = 0; c < C; c++) {
-            if (!visited[0][c] && (table[0][c] == OUTER || table[0][c] == EMPTY)) {
-                newOuterBlocks.addAll(getOuterBlocksWithBFS(0, c, visited));
-            }
-            if (!visited[R - 1][c] && (table[R - 1][c] == OUTER || table[R - 1][c] == EMPTY)) {
-                newOuterBlocks.addAll(getOuterBlocksWithBFS(R - 1, c, visited));
-            }
-        }
+        for (Cord edge : edgeCords) {
+            int r = edge.r, c = edge.c;
 
-        for (int r = 1; r < R - 1; r++) {
-            if (!visited[r][0] && (table[r][0] == OUTER || table[r][0] == EMPTY)) {
-                newOuterBlocks.addAll(getOuterBlocksWithBFS(r, 0, visited));
+            if (visited[r][c] || (table[r][c] != OUTER && table[r][c] != EMPTY)) {
+                continue;
             }
-            if (!visited[r][C - 1] && (table[r][C - 1] == OUTER || table[r][C - 1] == EMPTY)) {
-                newOuterBlocks.addAll(getOuterBlocksWithBFS(r, C - 1, visited));
-            }
+
+            newOuterBlocks.addAll(getOuterBlocksWithBFS(r, c, visited));
         }
 
         for (Cord c : newOuterBlocks) {
@@ -155,5 +162,13 @@ class Cord {
     public Cord(int r, int c) {
         this.r = r;
         this.c = c;
+    }
+
+    @Override
+    public String toString() {
+        return "Cord{" +
+                "r=" + r +
+                ", c=" + c +
+                '}';
     }
 }
