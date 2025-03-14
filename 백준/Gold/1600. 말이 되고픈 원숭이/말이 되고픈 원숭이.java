@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
+class Main {
 
     private static final BufferedReader br = new BufferedReader(
             new InputStreamReader(System.in)
@@ -11,97 +11,84 @@ public class Main {
     private static int[][] table;
     private static boolean[][][] visit;
 
-    private static final int[] dr1 = {
-            0, 0, 1, -1
-    }, dc1 = {
-            1, -1, 0, 0
-    };
-
-    private static final int[] dr2 = {
-            1, 2, 2, 1, -1, -2, -2, -1
-    }, dc2 = {
-            2, 1, -1, -2, -2, -1, 1, 2
-    };
+    private static final int[]
+            drM = {0, 0, 1, -1},
+            dcM = {1, -1, 0, 0},
+            drH = {1, 2, 2, 1, -1, -2, -2, -1},
+            dcH = {2, 1, -1, -2, -2, -1, 1, 2};
 
     private static boolean inRange(int r, int c) {
         return (r >= 0 && r < R && c >= 0 && c < C);
     }
 
+    private static boolean moveable(int r, int c, int jumps) {
+        return inRange(r, c) && table[r][c] == 0 && !visit[r][c][jumps];
+    }
 
-    public static void main(String[] args) throws IOException {
-
+    private static void init() throws IOException {
         K = Integer.parseInt(br.readLine());
 
         StringTokenizer st = new StringTokenizer(br.readLine());
         C = Integer.parseInt(st.nextToken());
         R = Integer.parseInt(st.nextToken());
 
-        table = new int[R][C];
+        table = new int[R][];
         visit = new boolean[R][C][K + 1];
 
         for (int i = 0; i < R; i++) {
-
-            st = new StringTokenizer(br.readLine());
-
-            for (int j = 0; j < C; j++) {
-                if (Integer.parseInt(st.nextToken()) == 1) {
-                    table[i][j] = -1;
-                }
-            }
+            table[i] = Arrays.stream(br.readLine().split(" "))
+                    .mapToInt(Integer::parseInt)
+                    .toArray();
         }
-        
-        System.out.println(bfs(0, 0));
+    }
+
+    public static void main(String[] args) throws IOException {
+        init();
+
+        System.out.println(bfs());
     }
 
 
-    private static int bfs(int initR, int initC) {
-
-        visit[initR][initC][K] = true;
+    private static int bfs() {
 
         Queue<State> q = new LinkedList<>();
-        q.add(new State(initR, initC, 0, K));
 
-        while (!q.isEmpty()) {
-
-            State cur = q.poll();
-            int steps = cur.steps;
-            int jumps = cur.remainJumps;
-
-            if (cur.r == R - 1 && cur.c == C - 1) {
-                return steps;
-            }
-
-
-            for (int i = 0; i < dr1.length; i++) {
-                int r = cur.r + dr1[i];
-                int c = cur.c + dc1[i];
+        Consumer appendNextToQ = (curr, dr, dc, jumps) -> {
+            for (int i = 0; i < dr.length; i++) {
+                int r = curr.r + dr[i];
+                int c = curr.c + dc[i];
 
                 if (moveable(r, c, jumps)) {
                     visit[r][c][jumps] = true;
-                    q.add(new State(r, c, steps + 1, jumps));
+                    q.add(new State(r, c, curr.steps + 1, jumps));
                 }
             }
+        };
 
-            if (jumps <= 0) {
-                continue;
+        return bfs(q, appendNextToQ);
+    }
+
+    private static int bfs(Queue<State> q, Consumer tasker)  {
+        visit[0][0][K] = true;
+        q.add(new State(0, 0, 0, K));
+
+        while (!q.isEmpty()) {
+
+            State curr = q.poll();
+            int jumps = curr.remainJumps;
+
+            if (curr.r == R - 1 && curr.c == C - 1) {
+                return curr.steps;
             }
 
-            for (int i = 0; i < dr2.length; i++) {
-                int r = cur.r + dr2[i];
-                int c = cur.c + dc2[i];
+            tasker.doTask(curr, drM, dcM, jumps);
 
-                if (moveable(r, c, jumps - 1)) {
-                    visit[r][c][jumps - 1] = true;
-                    q.add(new State(r, c, steps + 1, jumps - 1));
-                }
+            if (jumps > 0)  {
+                tasker.doTask(curr, drH, dcH, jumps - 1);
             }
         }
 
         return -1;
-    }
-
-    private static boolean moveable(int r, int c, int jumps) {
-        return inRange(r, c) && table[r][c] == 0 && !visit[r][c][jumps];
     }
 }
 
@@ -116,4 +103,8 @@ class State {
         this.steps = steps;
         this.remainJumps = remainJumps;
     }
+}
+
+interface Consumer {
+    void doTask(State curr, int[] dr, int[] dc, int jumps);
 }
