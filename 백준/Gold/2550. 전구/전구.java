@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 
+// https://one10004.tistory.com/248
+// https://gom20.tistory.com/91
 class Main {
 
     private static final BufferedReader br = new BufferedReader(
@@ -25,6 +27,12 @@ class Main {
                 .toArray();
     }
 
+    private static int[] getArr() throws IOException {
+        return Arrays.stream(br.readLine().split(" "))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+    }
+
     public static void main(String[] args) throws IOException {
 
         int[] arr = init();
@@ -32,7 +40,7 @@ class Main {
         int[] dp = new int[arr.length];
         int len = 0;
 
-        Stack<int[]> history = new Stack<>();
+        List<int[]> history = new ArrayList<>(arr.length);
         for (int val : arr) {
             int index = Arrays.binarySearch(dp, 0, len, val);
             int insertPoint = index < 0 ? -1 * (index + 1) : index;
@@ -45,27 +53,27 @@ class Main {
             history.add(new int[] {insertPoint, val});
         }
 
-        List<Integer> LIS = new ArrayList<>(len);
+        Collections.reverse(history);
+        int[] answer = new int[len];
+
         while (!history.isEmpty()) {
-            int[] pop = history.pop();
-            int index = pop[0];
-            int val = pop[1];
+            int[] hist = history.remove(0);
+            int index = hist[0];
+            int val = hist[1];
 
             if (index != len - 1)   {
                 continue;
             }
 
-            LIS.add(lightToSwitch.get(val));
-            len--;
+            answer[--len] = lightToSwitch.get(val);
         }
 
-        System.out.println(LIS.size());
-        LIS.stream().sorted().forEach(s -> System.out.print(s + " "));
-    }
+        Arrays.sort(answer);
 
-    private static int[] getArr() throws IOException {
-        return Arrays.stream(br.readLine().split(" "))
-                .mapToInt(Integer::parseInt)
-                .toArray();
+        System.out.println(answer.length);
+        for (int val : answer) {
+            System.out.print(val + " ");
+        }
+        System.out.println();
     }
 }
