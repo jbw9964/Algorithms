@@ -18,14 +18,6 @@ class Solution {
             }
         }
 
-        System.out.println(pq);
-
-        long answer = 0;
-        while (!pq.isEmpty())    {
-            int remain = pq.poll();
-            answer += (long) remain * remain;
-        }
-
-        return answer;
+        return pq.stream().mapToLong(r -> r * r).sum();
     }
 }
