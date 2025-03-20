@@ -13,7 +13,6 @@ for i in range(N):
         num = now[j]
         if num != 0:
             sec_list[num] = sec_list[num][:] + [[i, j]]
-
 S, X, Y = list(map(int, input().split()))
 
 vx = [-1, 1, 0, 0]
@@ -28,10 +27,9 @@ def dfs(now_sec):
             nx, ny = vx[i] + x, vy[i] + y
 
             if 0 <= nx < N and 0 <= ny < N and grid[nx][ny] == 0:
-                grid[nx][ny] = now_sec
-                new_queue.append([nx, ny])
+                    grid[nx][ny] = now_sec
+                    new_queue.append([nx, ny])
     sec_list[now_sec] = new_queue[:]
-
 now_sec = 0
 while True:
     if now_sec >= S:
