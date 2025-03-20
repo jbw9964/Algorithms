@@ -7,102 +7,95 @@ class Main {
             new InputStreamReader(System.in)
     );
 
-    private static int N, M, start, end;
+    private static int N, M, START, END;
+    private static List<Info>[] graph, reverseGraph;
     private static int[] inDegree;
-    private static int[][] costTable;
-    private static List<Integer>[] adjacent;
-    private static List<Integer>[] reverseAdjacent;
 
     @SuppressWarnings("unchecked")
     private static void init() throws IOException {
         N = Integer.parseInt(br.readLine());
         M = Integer.parseInt(br.readLine());
 
+        graph = new List[N + 1];
+        reverseGraph = new List[N + 1];
+        for (int i = 1; i <= N; i++) {
+            graph[i] = new ArrayList<>();
+            reverseGraph[i] = new ArrayList<>();
+        }
+
         inDegree = new int[N + 1];
-        costTable = new int[N + 1][N + 1];
-        adjacent = new ArrayList[N + 1];
-        reverseAdjacent = new ArrayList[N + 1];
 
         StringTokenizer st;
         for (int i = 0; i < M; i++) {
             st = new StringTokenizer(br.readLine());
+            int v1 = Integer.parseInt(st.nextToken());
+            int v2 = Integer.parseInt(st.nextToken());
+            int cost = Integer.parseInt(st.nextToken());
 
-            int from = Integer.parseInt(st.nextToken());
-            int to = Integer.parseInt(st.nextToken());
-            int time = Integer.parseInt(st.nextToken());
-
-            inDegree[to]++;
-            costTable[from][to] = time;
-            recordAdjacent(from, to, adjacent);
-            recordAdjacent(to, from, reverseAdjacent);
+            inDegree[v2]++;
+            graph[v1].add(new Info(v2, cost));
+            reverseGraph[v2].add(new Info(v1, cost));
         }
 
         st = new StringTokenizer(br.readLine());
-        start = Integer.parseInt(st.nextToken());
-        end = Integer.parseInt(st.nextToken());
-    }
-
-    private static void recordAdjacent(int from, int to, List<Integer>[] adjArr) {
-        if (adjArr[from] == null) {
-            adjArr[from] = new ArrayList<>();
-        }
-        adjArr[from].add(to);
+        START = Integer.parseInt(st.nextToken());
+        END = Integer.parseInt(st.nextToken());
     }
 
     public static void main(String[] args) throws IOException {
         init();
 
-        int[] lastTimeTable = new int[N + 1];
-
-        Queue<Integer> q = new LinkedList<>();
-        q.add(start);
+        int[] time = new int[N + 1];
+        Queue<Integer> q = new ArrayDeque<>();
+        q.add(START);
 
         while (!q.isEmpty()) {
-            int root = q.poll();
-            int currentTime = lastTimeTable[root];
+            int from = q.poll();
 
-            for (int adj : getAdjacent(root, adjacent)) {
-                if (--inDegree[adj] == 0) {
-                    q.add(adj);
+            for (Info adj : graph[from]) {
+                int to = adj.next;
+                if (--inDegree[to] == 0) {
+                    q.add(to);
                 }
-
-                lastTimeTable[adj] = Math.max(costTable[root][adj] + currentTime, lastTimeTable[adj]);
+                time[to] = Math.max(time[to], adj.cost + time[from]);
             }
         }
 
-        // 백트래킹
-        q.add(end);
+        q.add(END);
+        boolean[] appended = new boolean[N + 1];
+        appended[END] = true;
 
         int roadCnt = 0;
-        Set<Integer> visited = new HashSet<>();
-        visited.add(end);
-
         while (!q.isEmpty()) {
-            int to = q.poll();
+            int from = q.poll();
 
-            for (int from : getAdjacent(to, reverseAdjacent)) {
-                if (lastTimeTable[to] - lastTimeTable[from] == costTable[from][to]) {
+            for (Info adj : reverseGraph[from]) {
+                int to = adj.next;
+
+                if (time[from] - time[to] == adj.cost) {
                     roadCnt++;
 
-                    if (visited.add(from))    {
-                        q.add(from);
+                    if (!appended[to]) {
+                        appended[to] = true;
+                        q.add(to);
                     }
                 }
             }
         }
 
-        System.out.println(lastTimeTable[end]);
+        System.out.println(time[END]);
         System.out.println(roadCnt);
     }
 
-    private static List<Integer> getAdjacent(int v, List<Integer>[] adjArr) {
-        List<Integer> result = new ArrayList<>();
 
-        if (adjArr[v] != null) {
-            result.addAll(adjArr[v]);
-        }
+}
 
-        return result;
+class Info {
+    final int next, cost;
+
+    public Info(int next, int cost) {
+        this.next = next;
+        this.cost = cost;
     }
 }
 
