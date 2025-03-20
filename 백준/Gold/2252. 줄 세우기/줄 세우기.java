@@ -40,7 +40,7 @@ class Main {
 
         Queue<Integer> q = IntStream.rangeClosed(1, N)
                 .filter(v -> inDegree[v] == 0)
-                .boxed().collect(Collectors.toCollection(LinkedList::new));
+                .boxed().collect(Collectors.toCollection(ArrayDeque::new));
 
         StringBuilder sb = new StringBuilder();
 
