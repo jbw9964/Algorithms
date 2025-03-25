@@ -7,7 +7,6 @@ class Solution {
             int ballY = balls[i][1];
 
             int minima = Integer.MAX_VALUE;
-            int value = 0;
 
             if (startY != ballY || startX < ballX)  // left relfection
             minima = Math.min(      
