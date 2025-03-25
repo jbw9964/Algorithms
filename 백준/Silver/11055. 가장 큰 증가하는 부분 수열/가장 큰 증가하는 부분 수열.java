@@ -7,13 +7,24 @@ public class Main {
             new InputStreamReader(System.in)
     );
 
-    public static void main(String[] args) throws IOException {
-        int N = Integer.parseInt(br.readLine());
-        int[] numbers = Arrays.stream(br.readLine().split(" "))
-                .mapToInt(Integer::parseInt)
-                .toArray();
+    private static int N;
+    private static int[] numbers, dp;
 
-        int[] dp = new int[N];
+    private static void init() throws IOException {
+        N = Integer.parseInt(br.readLine());
+        numbers = new int[N];
+
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N; i++) {
+            numbers[i] = Integer.parseInt(st.nextToken());
+        }
+
+        dp = new int[N];
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        init();
         int answer = Integer.MIN_VALUE;
 
         for (int i = 0; i < N; i++) {
@@ -34,9 +45,5 @@ public class Main {
         }
 
         System.out.println(answer);
-    }
-
-    private static void showArr(int[] arr) {
-        System.out.println(Arrays.toString(arr));
     }
 }
