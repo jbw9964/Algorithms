@@ -15,6 +15,7 @@ public class Main {
 
     private static final int[] dr = {-1, 1, 0, 0}, dc = {0, 0, -1, 1};
     private static char[][] table;
+    private static boolean[] charVisited;
 
     private static void init() throws IOException {
         StringTokenizer st = new StringTokenizer(br.readLine());
@@ -25,82 +26,54 @@ public class Main {
         for (int i = 0; i < R; i++) {
             table[i] = br.readLine().toCharArray();
         }
+        charVisited = new boolean['z' - 'a' + 1];
     }
 
     public static void main(String[] args) throws IOException {
         init();
 
-        System.out.println(
-                dfs(new State(0, 0, null), new boolean[R][C], 1)
-        );
+        System.out.println(dfs(0, 0, new boolean[R][C], 1));
     }
 
-    private static int dfs(State curr, boolean[][] visited, int cnt) {
+    private static int dfs(int r, int c, boolean[][] visited, int cnt)  {
 
-        int initR = curr.r;
-        int initC = curr.c;
-
-        visited[initR][initC] = true;
-        curr.visit(table[initR][initC]);
+        visited[r][c] = true;
+        char curr = table[r][c];
+        visit(curr);
 
         int maxima = cnt;
         for (int i = 0; i < dr.length; i++) {
-            int r = initR + dr[i];
-            int c = initC + dc[i];
+            int nextR = r + dr[i];
+            int nextC = c + dc[i];
 
-            if (!inRange(r, c) || visited[r][c]) {
+            if (!inRange(nextR, nextC) || visited[nextR][nextC]) {
                 continue;
             }
 
-            char next = table[r][c];
-            if (!curr.visited(next)) {
-                curr.r = r;
-                curr.c = c;
-
-                maxima = Math.max(maxima, dfs(curr, visited, cnt + 1));
-
-                curr.r = initR;
-                curr.c = initC;
+            char next = table[nextR][nextC];
+            if (!charVisited(next)) {
+                maxima = Math.max(maxima, dfs(nextR, nextC, visited, cnt + 1));
             }
         }
 
-        visited[initR][initC] = false;
-        curr.unVisit(table[initR][initC]);
+        unVisited(curr);
+        visited[r][c] = false;
 
         return Math.max(maxima, cnt);
     }
-}
 
-class State {
-
-    int r, c;
-    boolean[] visited;
-
-    private static final int CHAR_LENGTH = 'z' - 'a' + 1;
+    private static void visit(char ch)  {
+        charVisited[toIndex(ch)] = true;
+    }
+    private static void unVisited(char ch) {
+        charVisited[toIndex(ch)] = false;
+    }
+    private static boolean charVisited(char ch) {
+        return charVisited[toIndex(ch)];
+    }
 
     private static int toIndex(char ch) {
         ch = Character.toLowerCase(ch);
         return ch - 'a';
-    }
-
-    public State(int newR, int newC, State parent) {
-        visited = new boolean[CHAR_LENGTH];
-        this.r = newR;
-        this.c = newC;
-        if (parent != null && parent.visited != null) {
-            System.arraycopy(parent.visited, 0, visited, 0, visited.length);
-        }
-    }
-
-    public boolean visited(char ch) {
-        return visited[toIndex(ch)];
-    }
-
-    public void visit(char ch) {
-        visited[toIndex(ch)] = true;
-    }
-
-    public void unVisit(char ch) {
-        visited[toIndex(ch)] = false;
     }
 }
