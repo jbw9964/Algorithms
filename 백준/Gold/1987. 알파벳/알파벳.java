@@ -37,26 +37,35 @@ public class Main {
 
     private static int dfs(State curr, boolean[][] visited, int cnt) {
 
-        visited[curr.r][curr.c] = true;
-        curr.visit(table[curr.r][curr.c]);
+        int initR = curr.r;
+        int initC = curr.c;
+
+        visited[initR][initC] = true;
+        curr.visit(table[initR][initC]);
 
         int maxima = cnt;
         for (int i = 0; i < dr.length; i++) {
-            int r = curr.r + dr[i];
-            int c = curr.c + dc[i];
+            int r = initR + dr[i];
+            int c = initC + dc[i];
 
             if (!inRange(r, c) || visited[r][c]) {
                 continue;
             }
 
-            if (!curr.visited(table[r][c])) {
-                maxima = Math.max(
-                        maxima, dfs(new State(r, c, curr), visited, cnt + 1)
-                );
+            char next = table[r][c];
+            if (!curr.visited(next)) {
+                curr.r = r;
+                curr.c = c;
+
+                maxima = Math.max(maxima, dfs(curr, visited, cnt + 1));
+
+                curr.r = initR;
+                curr.c = initC;
             }
         }
 
-        visited[curr.r][curr.c] = false;
+        visited[initR][initC] = false;
+        curr.unVisit(table[initR][initC]);
 
         return Math.max(maxima, cnt);
     }
@@ -89,5 +98,9 @@ class State {
 
     public void visit(char ch) {
         visited[toIndex(ch)] = true;
+    }
+
+    public void unVisit(char ch) {
+        visited[toIndex(ch)] = false;
     }
 }
