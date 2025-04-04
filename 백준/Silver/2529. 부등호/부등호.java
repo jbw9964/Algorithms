@@ -41,12 +41,11 @@ public class Main {
         if (cnt == K + 1) {
 
             String answer = storage.toString();
-            long value = toLong(answer);
 
-            if (MINIMA == null || toLong(MINIMA) > value) {
+            if (MINIMA == null || answer.compareTo(MINIMA) < 0) {
                 MINIMA = answer;
             }
-            if (MAXIMA == null || toLong(MAXIMA) < value) {
+            if (MAXIMA == null || answer.compareTo(MAXIMA) > 0) {
                 MAXIMA = answer;
             }
 
@@ -76,9 +75,5 @@ public class Main {
                 }
             }
         }
-    }
-
-    private static long toLong(String str)    {
-        return Long.parseLong(str);
     }
 }
