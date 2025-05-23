@@ -1,75 +1,79 @@
 import java.io.*;
-import java.util.*;
 
 public class Main {
 
-    private static final BufferedReader br = new BufferedReader(
-            new InputStreamReader(System.in)
-    );
+    private static final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-    private static int N, CASE_NUM;
-    private static boolean[] horizontal, vertical;
-    private static boolean[] diagonal1, diagonal2;
+    private static int N;
+    private static boolean[] horizontalVisit;   // - direction
+    private static boolean[] verticalVisit;     // | direction
+    private static boolean[] d1Visit;           // \ direction
+    private static boolean[] d2Visit;           // / direction
 
-    private static void init() throws IOException {
+    private static void init()  throws IOException {
         N = Integer.parseInt(br.readLine());
-
-        horizontal = new boolean[N];
-        vertical = new boolean[N];
-
-        diagonal1 = new boolean[2 * N - 1];
-        diagonal2 = new boolean[2 * N - 1];
-
-        Arrays.fill(horizontal, true);
-        Arrays.fill(vertical, true);
-        Arrays.fill(diagonal1, true);
-        Arrays.fill(diagonal2, true);
+        horizontalVisit = new boolean[N];
+        verticalVisit = new boolean[N];
+        d1Visit = new boolean[2 * N - 1];
+        d2Visit = new boolean[2 * N - 1];
     }
 
     public static void main(String[] args) throws IOException {
 
         init();
 
-        dfs(0);
+        backtrack(0);
 
-        System.out.println(CASE_NUM);
+        System.out.println(ANSWER);
     }
 
-    private static void dfs(int row) {
+    private static int ANSWER = 0;
 
-        if (row >= N) {
-            CASE_NUM++;
+    public static void backtrack(int row)   {
+
+        if (row == N)   {
+            ANSWER++;
             return;
         }
 
-        for (int col = 0; col < N; col++) {
-            if (placeable(row, col)) {
-                visit(row, col);
-                dfs(row + 1);
-                leave(row, col);
+        for (int c = 0; c < N; c++) {
+            if (!placeable(row, c)) {
+                continue;
             }
+
+            visit(row, c);
+            backtrack(row + 1);
+            unVisit(row, c);
         }
     }
 
-
-    private static boolean placeable(int i, int j) {
-        return horizontal[i] && vertical[j] &&
-                diagonal1[N - 1 + i - j] && diagonal2[i + j];
+    public static boolean placeable(int r, int c)   {
+        return !horizontalVisit[r] && !verticalVisit[c] &&
+                !d1Visit[toD1(r, c)] && !d2Visit[toD2(r, c)];
     }
 
-    private static void visit(int i, int j) {
-        record(i, j, false);
+    public static void visit(int r, int c) {
+        horizontalVisit[r] = true;
+        verticalVisit[c] = true;
+        d1Visit[toD1(r, c)] = true;
+        d2Visit[toD2(r, c)] = true;
     }
 
-    private static void leave(int i, int j) {
-        record(i, j, true);
+    public static void unVisit(int r, int c) {
+        horizontalVisit[r] = false;
+        verticalVisit[c] = false;
+        d1Visit[toD1(r, c)] = false;
+        d2Visit[toD2(r, c)] = false;
     }
 
-    private static void record(int i, int j, boolean val) {
-        horizontal[i] = val;
-        vertical[j] = val;
+    // \ direction
+    public static int toD1(int r, int c) {
+        return r - c + N - 1;
+    }
 
-        diagonal1[N - 1 + i - j] = val;
-        diagonal2[i + j] = val;
+    // / direction
+    public static int toD2(int r, int c) {
+        return r + c;
     }
 }
+
