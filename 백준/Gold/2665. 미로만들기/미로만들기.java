@@ -8,91 +8,89 @@ public class Main {
     );
 
     private static int N, R, C;
-    private static final int[] dr = {-1, 1, 0, 0}, dc = {0, 0, -1, 1};
+    private static int[][] table;
+    private static final int[] dr = {0, 0, -1, 1}, dc = {-1, 1, 0, 0};
 
     private static boolean inRange(int r, int c) {
         return r >= 0 && r < R && c >= 0 && c < C;
     }
 
-    private static int[][] table;
-
-    public static void main(String[] args) throws IOException {
-
+    private static void init() throws IOException {
         N = R = C = Integer.parseInt(br.readLine());
 
         table = new int[R][];
-
-        for (int i = 0; i < R; i++) {
-            int[] row = Arrays.stream(br.readLine().split(""))
-                    .mapToInt(Integer::valueOf)
+        for (int i = 0; i < N; i++) {
+            table[i] = Arrays.stream(br.readLine().split(""))
+                    .mapToInt(Integer::parseInt)
                     .toArray();
-
-            table[i] = row;
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        init();
 
         System.out.println(bfs());
     }
 
-    private static int bfs()    {
+    private static int bfs() {
 
-        boolean[][][] visited = new boolean[N * N][R][C];
+        boolean[][] visited = new boolean[R][C];
+        visited[0][0] = true;
 
-        PriorityQueue<Cord> pq = new PriorityQueue<>(
-                Comparator.comparingInt(c -> c.numOfBlacks)
-        );
-        pq.add(new Cord(0, 0, 0));
+        Queue<Cord> q = new LinkedList<>();
+        q.add(new Cord(0, 0));
 
-        while (!pq.isEmpty()) {
+        int delCnt = 0;
 
-            Cord curr = pq.poll();
-            int blacks = curr.numOfBlacks;
+        while (delCnt < N * N) {
 
-            if (curr.r == R - 1 && curr.c == C - 1) {
-                return blacks;
-            }
+            Queue<Cord> nextQ = new LinkedList<>();
+            
+            while (!q.isEmpty()) {
+                Cord cord = q.poll();
 
-            for (int i = 0; i < dr.length; i++) {
-                int r = curr.r + dr[i];
-                int c = curr.c + dc[i];
+                int r = cord.r;
+                int c = cord.c;
 
-                if (!inRange(r, c)) {
-                    continue;
+                if (r == R - 1 && c == C - 1) {
+                    return delCnt;
                 }
 
-                if (hasVisited(visited, r, c, blacks)){
-                    continue;
-                }
+                for (int i = 0; i < dr.length; i++) {
+                    int newR = r + dr[i];
+                    int newC = c + dc[i];
 
-                visited[blacks][r][c] = true;
-                pq.add(new Cord(
-                        r, c,
-                        blacks + (table[r][c] == 1 ? 0 : 1)
-                ));
+                    if (!inRange(newR, newC) || visited[newR][newC]) {
+                        continue;
+                    }
+
+                    visited[newR][newC] = true;
+                    Cord newCord = new Cord(newR, newC);
+
+                    if (table[newR][newC] == 1) {
+                        q.add(newCord);
+                    }
+                    else {
+                        nextQ.add(newCord);
+                    }
+                }
             }
+
+            q = nextQ;
+            delCnt++;
         }
 
         throw new RuntimeException();
     }
-
-    private static boolean hasVisited(boolean[][][] visited, int r, int c, int blacks) {
-        for (int b = 0; b <= blacks; b++) {
-            if (visited[b][r][c]) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
-
 
 class Cord {
 
-    int r, c;
-    int numOfBlacks;
+    final int r, c;
 
-    public Cord(int r, int c, int numOfBlacks) {
+    public Cord(int r, int c) {
         this.r = r;
         this.c = c;
-        this.numOfBlacks = numOfBlacks;
     }
 }
