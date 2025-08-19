@@ -14,8 +14,8 @@ public class Main {
     private static int[] dropColumns;
     private static Deque<Cord>[] cordCaches;
 
-    private static boolean inRange(int r, int c) {
-        return r>=0 && r<R && c>=0 && c<C;
+    private static boolean outOfRange(int r, int c) {
+        return r < 0 || r >= R || c < 0 || c >= C;
     }
 
     private static void init() throws IOException {
@@ -62,41 +62,29 @@ public class Main {
         if (cordCache.isEmpty()) {
             r = 0;
             c = dropCol;
-        }
-        else {
+        } else {
             r = cordCache.peekLast().r;
             c = cordCache.peekLast().c;
         }
 
-        while (true)    {
+        while (true) {
 
             if (blockedByWallOrEdge(r, c)) {
                 break;
             }
 
-            if (table[r + 1][c] == '.') {
-                r++;
-                cordCache.addLast(new Cord(r - 1, c));
+            if (nothingBelow(r, c)) {
+                cordCache.addLast(new Cord(r++, c));
                 continue;
             }
 
-            // left assignable
-            if (
-                    inRange(r + 1, c - 1) &&
-                    table[r][c - 1] == '.' &&
-                    table[r + 1][c - 1] == '.'
-            )   {
+            if (leftMoveable(r, c)) {
                 r++;
                 c--;
                 continue;
             }
 
-            // right assignable
-            if (
-                    inRange(r + 1, c + 1) &&
-                    table[r][c + 1] == '.' &&
-                    table[r + 1][c + 1] == '.'
-            )   {
+            if (rightMoveable(r, c)) {
                 r++;
                 c++;
                 continue;
@@ -119,10 +107,28 @@ public class Main {
         }
     }
 
-    private static boolean blockedByWallOrEdge(int r, int c)    {
-        return !inRange(r + 1, c) || table[r + 1][c] == 'X';
+    private static boolean blockedByWallOrEdge(int r, int c) {
+        return outOfRange(r + 1, c) || table[r + 1][c] == 'X';
     }
 
+    private static boolean nothingBelow(int r, int c) {
+        if (outOfRange(r, c)) {
+            throw new IllegalArgumentException();
+        }
+        return table[r + 1][c] == '.';
+    }
+
+    private static boolean leftMoveable(int r, int c) {
+        return !outOfRange(r + 1, c - 1) &&
+               table[r][c - 1] == '.' &&
+               table[r + 1][c - 1] == '.';
+    }
+
+    private static boolean rightMoveable(int r, int c) {
+        return !outOfRange(r + 1, c + 1) &&
+               table[r][c + 1] == '.' &&
+               table[r + 1][c + 1] == '.';
+    }
 
     public static void printTable() {
         for (char[] row : table) {
