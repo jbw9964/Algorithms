@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.util.stream.*;
 
 public class Main {
 
@@ -23,46 +24,53 @@ public class Main {
 
         tokens = new String[C];
         for (int col = 0; col < C; col++) {
-            tokens[col] = genColumnStr(col, chars);
+
+            StringBuilder sb = new StringBuilder();
+            for (int row = 0; row < R; row++) {
+                sb.append(chars[row][col]);
+            }
+
+            tokens[col] = sb.toString();
         }
-    }
-
-    private static String genColumnStr(int col, char[][] chars) {
-
-        StringBuilder sb = new StringBuilder();
-        for (char[] row : chars) {
-            sb.append(row[col]);
-        }
-
-        return sb.toString();
     }
 
     public static void main(String[] args) throws IOException {
 
         init();
 
-        int answer = 0;
+        int left = 0, right = R - 1;
+        int answer = left;
 
-        Set<String> set = new HashSet<>();
+        while (left <= right)    {
+            
+            int mid = (left + right) >>> 1;
 
-        LOOP:
-        while (true)    {
-            for (int i = 0; i < tokens.length; i++) {
-                String subToken = tokens[i].substring(1);
-
-                if (set.contains(subToken)) {
-                    break LOOP;
-                }
-
-                set.add(subToken);
-                tokens[i] = subToken;
+            if (isSafe(mid))    {
+                answer = mid;
+                left = mid + 1;
             }
-
-            answer++;
-            set.clear();
+            else {
+                right = mid - 1;
+            }
         }
 
         System.out.println(answer);
     }
+    
+    private static boolean isSafe(int beginIndex)   {
+        
+        Set<String> set = new HashSet<>();
 
+        for (int col = 0; col < C; col++) {
+            if (!set.add(getSubTokenFrom(beginIndex, col))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static String getSubTokenFrom(int beginIndex, int col)    {
+        return tokens[col].substring(beginIndex);
+    }
 }
