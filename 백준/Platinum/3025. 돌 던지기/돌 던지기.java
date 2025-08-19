@@ -131,9 +131,11 @@ public class Main {
     }
 
     public static void printTable() {
+        StringBuilder sb = new StringBuilder();
         for (char[] row : table) {
-            System.out.println(String.valueOf(row));
+            sb.append(row).append('\n');
         }
+        System.out.println(sb.toString());
     }
 }
 
