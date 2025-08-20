@@ -8,13 +8,19 @@ public class Main {
     );
 
     private static int N, M;
-    private static int[] cards, checks;
+    private static final int MIN = 10_000_000;
+    private static int[] cntMap, checks;
 
     private static void init() throws IOException {
         N = Integer.parseInt(br.readLine());
-        cards = Arrays.stream(br.readLine().split(" "))
+        int[] cards = Arrays.stream(br.readLine().split(" "))
                 .mapToInt(Integer::parseInt)
                 .toArray();
+
+        cntMap = new int[2 * MIN + 1];
+        for (int i = 0; i < N; i++) {
+            cntMap[cards[i] + MIN]++;
+        }
 
         M = Integer.parseInt(br.readLine());
         checks = Arrays.stream(br.readLine().split(" "))
@@ -26,19 +32,14 @@ public class Main {
 
         init();
 
-        Map<Integer, Integer> map = new HashMap<>(2 * N);
+        StringBuilder sb = new StringBuilder();
 
-        for (int card : cards) {
-            int count = map.getOrDefault(card, 0);
-            map.put(card, count + 1);
+        for (int check : checks)    {
+
+            sb.append(cntMap[check + MIN])
+                    .append(" ");
         }
 
-        StringBuilder answer = new StringBuilder();
-        for (int check : checks) {
-            int count = map.getOrDefault(check, 0);
-            answer.append(count).append(" ");
-        }
-
-        System.out.println(answer.toString());
+        System.out.println(sb.toString());
     }
 }
