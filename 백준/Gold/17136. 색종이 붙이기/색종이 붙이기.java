@@ -25,11 +25,7 @@ public class Main {
             table[i] = Arrays.stream(br.readLine().split(" "))
                     .mapToInt(Integer::parseInt)
                     .toArray();
-            for (int val : table[i]) {
-                if (val == 1) {
-                    totalCnt += 1;
-                }
-            }
+            totalCnt += Arrays.stream(table[i]).sum();
         }
 
         cntMap = new int[5];
@@ -43,9 +39,14 @@ public class Main {
 
         init();
 
-        backtrack(0, 0);
+        if (totalCnt == 0)  {
+            System.out.println(0);
+        }
+        else {
+            backtrack(0, 0);
 
-        System.out.println(ANSWER == Integer.MAX_VALUE ? -1 : ANSWER);
+            System.out.println(ANSWER == Integer.MAX_VALUE ? -1 : ANSWER);
+        }
     }
 
     private static void backtrack(int fillCnt, int elementCnt) {
