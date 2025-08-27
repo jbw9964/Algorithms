@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.*;
 
 public class Main {
 
@@ -23,14 +24,13 @@ public class Main {
                 continue;
             }
 
-            int minima = num;
-            for (int i = 1; i <= num / 2; i++) {
-                int head = DP[i];
-                int tail = DP[num - i];
-                minima = Math.min(minima, head + tail);
+            DP[num] = num;
+            for (int square = 1; num - square * square >= 1; square++) {
+                DP[num] = Math.min(
+                        DP[num],
+                        DP[num - square * square] + 1
+                );
             }
-
-            DP[num] = minima;
         }
     }
 
