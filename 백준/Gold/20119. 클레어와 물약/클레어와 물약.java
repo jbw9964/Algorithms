@@ -36,7 +36,7 @@ public class Main {
             (parents[r] == null ? parents[r] = new ArrayList<>() : parents[r])
                     .add(parent);
 
-            for (int p : parent)    {
+            for (int p : parent) {
                 (children[p] == null ? children[p] = new ArrayList<>() : children[p])
                         .add(r);
             }
@@ -73,7 +73,7 @@ public class Main {
             visited[available] = true;
             List<Integer> candidates = children[available];
 
-            if (candidates != null && !candidates.isEmpty())    {
+            if (candidates != null && !candidates.isEmpty()) {
                 q.addAll(candidates);
             }
         }
@@ -81,6 +81,10 @@ public class Main {
         while (!q.isEmpty()) {
 
             Integer current = q.poll();
+
+            if (visited[current]) {
+                continue;
+            }
 
             List<List<Integer>> parentList = parents[current];
             if (parentList == null || parentList.isEmpty()) {
@@ -103,7 +107,7 @@ public class Main {
             availablePotions.add(current);
             List<Integer> candidates = children[current];
 
-            if (candidates != null && !candidates.isEmpty())    {
+            if (candidates != null && !candidates.isEmpty()) {
                 for (Integer candidate : candidates) {
                     if (visited[candidate]) {
                         continue;
