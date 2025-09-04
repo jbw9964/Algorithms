@@ -9,7 +9,7 @@ public class Main {
     );
 
     private static int N, K;
-    private static Set<Integer> coins;
+    private static int[] coins;
 
     private static void init() throws IOException {
 
@@ -17,9 +17,9 @@ public class Main {
         N = Integer.parseInt(st.nextToken());
         K = Integer.parseInt(st.nextToken());
 
-        coins = new HashSet<>();
+        coins = new int[N];
         for (int i = 0; i < N; i++) {
-            coins.add(Integer.parseInt(br.readLine()));
+            coins[i] = Integer.parseInt(br.readLine());
         }
     }
 
