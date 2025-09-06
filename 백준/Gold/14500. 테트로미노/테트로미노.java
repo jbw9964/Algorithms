@@ -43,10 +43,7 @@ public class Main {
                     LOOP_CHECK:
                     for (int rotate = 0; rotate < 4; rotate++) {
                         int sum = 0;
-
-                        check = check.stream()
-                                .map(Cord::rotate)
-                                .collect(Collectors.toList());
+                        check.forEach(Cord::rotate);
 
                         for (Cord cord : check) {
                             int checkR = r + cord.r;
@@ -87,8 +84,8 @@ enum Type {
         this.desc = desc;
     }
 
-    public List<Cord> getBaseCords()    {
-        if (this == A)  {
+    public List<Cord> getBaseCords() {
+        if (this == A) {
             return Arrays.asList(
                     new Cord(0, 0), new Cord(0, 1),
                     new Cord(0, 2), new Cord(0, 3)
@@ -143,7 +140,7 @@ enum Type {
 
 class Cord {
 
-    final int r, c;
+    int r, c;
     private static final int[][] rotationMatrix = {
             {0, -1},
             {1, 0}
@@ -155,12 +152,13 @@ class Cord {
     }
 
 
-    public Cord rotate() {
+    public void rotate() {
 
         int nextR = r * rotationMatrix[0][0] + c * rotationMatrix[0][1];
         int nextC = r * rotationMatrix[1][0] + c * rotationMatrix[1][1];
 
-        return new Cord(nextR, nextC);
+        r = nextR;
+        c = nextC;
     }
 
     @Override
