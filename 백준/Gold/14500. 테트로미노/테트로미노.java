@@ -72,69 +72,43 @@ public class Main {
 }
 
 enum Type {
-    A("직선으로 긴거"),
-    B("정사각형"),
-    C1("L 자 모양인거"), C2("L 자 모양 반전"),
-    D1("번개 모양인거"), D2("번개 모양 반전"),
-    E("ㅜ 모양인거");
+    A(Arrays.asList(
+            new Cord(0, 0), new Cord(0, 1),
+            new Cord(0, 2), new Cord(0, 3)
+    )),
+    B(Arrays.asList(
+            new Cord(0, 0), new Cord(0, 1),
+            new Cord(1, 0), new Cord(1, 1)
+    )),
+    C1(Arrays.asList(
+            new Cord(0, 0), new Cord(1, 0),
+            new Cord(2, 0), new Cord(2, 1)
+    )),
+    C2(Arrays.asList(
+            new Cord(0, 0), new Cord(1, 0),
+            new Cord(2, 0), new Cord(2, -1)
+    )),
+    D1(Arrays.asList(
+            new Cord(0, 0), new Cord(1, 0),
+            new Cord(1, 1), new Cord(2, 1)
+    )),
+    D2(Arrays.asList(
+            new Cord(0, 0), new Cord(1, 0),
+            new Cord(1, -1), new Cord(2, -1)
+    )),
+    E(Arrays.asList(
+            new Cord(0, 0), new Cord(0, 1),
+            new Cord(0, 2), new Cord(1, 1)
+    ));
 
-    final String desc;
+    final List<Cord> baseCords;
 
-    private Type(String desc) {
-        this.desc = desc;
+    Type(List<Cord> baseCords) {
+        this.baseCords = baseCords;
     }
 
     public List<Cord> getBaseCords() {
-        if (this == A) {
-            return Arrays.asList(
-                    new Cord(0, 0), new Cord(0, 1),
-                    new Cord(0, 2), new Cord(0, 3)
-            );
-        }
-
-        if (this == B) {
-            return Arrays.asList(
-                    new Cord(0, 0), new Cord(0, 1),
-                    new Cord(1, 0), new Cord(1, 1)
-            );
-        }
-
-        if (this == C1) {
-            return Arrays.asList(
-                    new Cord(0, 0), new Cord(1, 0),
-                    new Cord(2, 0), new Cord(2, 1)
-            );
-        }
-
-        if (this == C2) {
-            return Arrays.asList(
-                    new Cord(0, 0), new Cord(1, 0),
-                    new Cord(2, 0), new Cord(2, -1)
-            );
-        }
-
-        if (this == D1) {
-            return Arrays.asList(
-                    new Cord(0, 0), new Cord(1, 0),
-                    new Cord(1, 1), new Cord(2, 1)
-            );
-        }
-
-        if (this == D2) {
-            return Arrays.asList(
-                    new Cord(0, 0), new Cord(1, 0),
-                    new Cord(1, -1), new Cord(2, -1)
-            );
-        }
-
-        if (this == E) {
-            return Arrays.asList(
-                    new Cord(0, 0), new Cord(0, 1),
-                    new Cord(0, 2), new Cord(1, 1)
-            );
-        }
-
-        throw new IllegalArgumentException();
+        return baseCords;
     }
 }
 
