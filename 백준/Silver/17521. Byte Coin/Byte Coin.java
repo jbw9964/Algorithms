@@ -29,8 +29,11 @@ public class Main {
 
         for (int pivot = 0; pivot < N; pivot++) {
 
-            int currentPrice = prices[pivot];
-            
+            long currentPrice = prices[pivot];
+            if (answer < currentPrice) {
+                continue;
+            }
+
             int next = pivot;
             while (next + 1 < N && prices[next] <= prices[next + 1]) {
                 next++;
