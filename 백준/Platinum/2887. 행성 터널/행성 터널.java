@@ -86,7 +86,7 @@ public class Main {
         int edgeCnt = 0;
         long costSum = 0;
 
-        while (!edges.isEmpty() && edgeCnt < N - 1) {
+        while (!edges.isEmpty()) {
 
             Edge edge = edges.poll();
 
