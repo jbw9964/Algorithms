@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.*;
 
 public class Main {
 
@@ -9,8 +10,8 @@ public class Main {
     );
 
     private static int N;
-    private static Planet[] planets;
-    private static List<Edge>[] edges;
+    private static PriorityQueue<Edge> edges;
+    private static int[] parents;
 
     private static final Comparator<Planet>
             sortByX = Comparator.comparing(Planet::getX),
@@ -27,7 +28,7 @@ public class Main {
         N = Integer.parseInt(br.readLine());
 
         List<Planet> planetList = new ArrayList<>(N);
-        planets = new Planet[N];
+
         for (int i = 0; i < N; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine());
 
@@ -35,10 +36,10 @@ public class Main {
             long y = Long.parseLong(st.nextToken());
             long z = Long.parseLong(st.nextToken());
 
-            planetList.add(planets[i] = new Planet(i, x, y, z));
+            planetList.add(new Planet(i, x, y, z));
         }
 
-        edges = new List[N];
+        edges = new PriorityQueue<>(3 * N);
         Comparator<Planet>[] comparators = new Comparator[]{
                 sortByX, sortByY, sortByZ
         };
@@ -58,71 +59,58 @@ public class Main {
             while (iterator.hasNext()) {
                 Planet curr = iterator.next();
 
-                int from = prev.index;
-                int to = curr.index;
+                int v1 = prev.index;
+                int v2 = curr.index;
                 long cost = Math.abs(func.applyAsLong(curr) - func.applyAsLong(prev));
 
-                if (edges[from] == null) {
-                    edges[from] = new ArrayList<>();
-                }
-                edges[from].add(new Edge(to, cost));
-
-                if (edges[to] == null) {
-                    edges[to] = new ArrayList<>();
-                }
-                edges[to].add(new Edge(from, cost));
+                edges.add(new Edge(v1, v2, cost));
 
                 prev = curr;
             }
         }
+
+        parents = IntStream.range(0, N).toArray();
     }
 
     public static void main(String[] args) throws IOException {
 
         init();
 
-        long answer = getMstCostFrom(0);
+        long answer = getMstCostFrom();
 
         System.out.println(answer);
     }
 
-    private static long getMstCostFrom(int start) {
+    private static long getMstCostFrom() {
 
-        boolean[] visited = new boolean[N];
-        PriorityQueue<Edge> pq = new PriorityQueue<>();
-        pq.add(new Edge(start, 0));
-
-        int visitCnt = 0;
+        int edgeCnt = 0;
         long costSum = 0;
 
-        while (!pq.isEmpty() && visitCnt < N) {
-            Edge curr = pq.poll();
+        while (!edges.isEmpty() && edgeCnt < N - 1) {
 
-            int to = curr.to;
-            long cost = curr.cost;
+            Edge edge = edges.poll();
 
-            if (visited[to]) {
+            int v1 = edge.v1, v2 = edge.v2;
+            int p1 = getParent(v1), p2 = getParent(v2);
+
+            if (p1 == p2) {
                 continue;
             }
 
-            visited[to] = true;
-            costSum += cost;
-            visitCnt++;
+            costSum += edge.cost;
+            edgeCnt++;
 
-            List<Edge> candidates = edges[to];
-            if (candidates == null) {
-                continue;
-            }
+            int root = Math.min(p1, p2);
+            int child = Math.max(p1, p2);
 
-            for (Edge c : candidates) {
-                int to2 = c.to;
-                if (!visited[to2]) {
-                    pq.add(c);
-                }
-            }
+            parents[child] = root;
         }
 
         return costSum;
+    }
+
+    private static int getParent(int v) {
+        return parents[v] == v ? v : (parents[v] = getParent(parents[v]));
     }
 }
 
@@ -162,24 +150,26 @@ class Planet {
 
 class Edge implements Comparable<Edge> {
 
-    final int to;
+    final int v1, v2;
     final long cost;
 
-    public Edge(int to, long cost) {
-        this.to = to;
+    public Edge(int v1, int v2, long cost) {
+        this.v1 = v1;
+        this.v2 = v2;
         this.cost = cost;
-    }
-
-    @Override
-    public String toString() {
-        return "Edge{" +
-               "to=" + to +
-               ", cost=" + cost +
-               '}';
     }
 
     @Override
     public int compareTo(Edge o) {
         return Long.compare(this.cost, o.cost);
+    }
+
+    @Override
+    public String toString() {
+        return "Edge{" +
+               "v1=" + v1 +
+               ", v2=" + v2 +
+               ", cost=" + cost +
+               '}';
     }
 }
