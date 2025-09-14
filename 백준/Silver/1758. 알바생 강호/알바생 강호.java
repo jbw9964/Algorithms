@@ -1,32 +1,44 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Collections;
+import java.io.*;
+import java.util.*;
 
 public class Main {
 
     private static final BufferedReader br = new BufferedReader(
-        new InputStreamReader(System.in)
+            new InputStreamReader(System.in)
     );
 
+    private static int N;
+    private static PriorityQueue<Integer> pq;
 
-    public static void main (String[] args) throws IOException {
+    private static void init() throws IOException {
 
-        int N = Integer.parseInt(br.readLine());
+        N = Integer.parseInt(br.readLine());
 
-        Long[] arrayTips = new Long[N];
-        for (int i = 0; i < N; i++) arrayTips[i] = Long.parseLong(br.readLine());
-        Arrays.sort(arrayTips, Collections.reverseOrder());
-
-        long result = 0;
+        pq = new PriorityQueue<>(Comparator.reverseOrder());
         for (int i = 0; i < N; i++) {
-            long tip = arrayTips[i] - i;
+            pq.add(Integer.parseInt(br.readLine()));
+        }
+    }
 
-            if (tip <= 0)   break;
-            result += tip;
+    public static void main(String[] args) throws IOException {
+
+        init();
+
+        long answer = 0;
+        int i = 0;
+
+        while (!pq.isEmpty()) {
+
+            int curr = pq.poll();
+            int tip = curr - i++;
+
+            if (tip < 0) {
+                break;
+            }
+
+            answer += tip;
         }
 
-        System.out.println(result);
+        System.out.println(answer);
     }
 }
