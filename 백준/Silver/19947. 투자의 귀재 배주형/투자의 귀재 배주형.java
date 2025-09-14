@@ -7,65 +7,48 @@ public class Main {
             new InputStreamReader(System.in)
     );
 
-    public static void main(String[] args) throws IOException {
+
+    private static long H;
+    private static int Y;
+
+    private static void init() throws IOException {
 
         StringTokenizer st = new StringTokenizer(br.readLine());
+        H = Long.parseLong(st.nextToken());
+        Y = Integer.parseInt(st.nextToken());
 
-        final int H = Integer.parseInt(st.nextToken());
-        final int Y = Integer.parseInt(st.nextToken());
+    }
 
-        int answer = H;
-        Queue<State> q = new LinkedList<>();
-        q.add(new State(H, 0));
+    public static void main(String[] args) throws IOException {
 
-        while (!q.isEmpty()) {
+        init();
 
-            State cur = q.poll();
-            int money = cur.money;
-            int currentYear = cur.currentYear;
+        long[] DP = new long[Y + 1];
+        DP[0] = H;
 
-            answer = Math.max(answer, money);
+        double[] ratios = {
+                1.05d, 1.2d, 1.35d
+        };
 
-            if (currentYear + 1 <= Y) {
-                q.add(
-                        new State((int) (money * 1.05d), currentYear + 1)
-                );
-            }
+        for (int y = 0; y < Y; y++) {
 
-            if (currentYear + 3 <= Y) {
-                q.add(
-                        new State((int) (money * 1.20d), currentYear + 3)
-                );
-            }
+            long base = DP[y];
 
-            if (currentYear + 5 <= Y) {
-                q.add(
-                        new State((int) (money * 1.35d), currentYear + 5)
-                );
+            for (int i = 0; i < 3; i++) {
+
+                int nextY = y + 2 * i + 1;
+                double ratio = ratios[i];
+
+                if (nextY <= Y) {
+                    DP[nextY] = Math.max(DP[nextY], truncate(base * ratio));
+                }
             }
         }
 
-        System.out.println(answer);
+        System.out.println(DP[Y]);
     }
 
-}
-
-
-class State {
-
-    int money, currentYear;
-
-    public State(int money, int currentYear) {
-        this.money = money;
-        this.currentYear = currentYear;
-    }
-
-    @Override
-    public String toString() {
-        return "State{" +
-                "money=" + money +
-                ", currentYear=" + currentYear +
-                '}';
+    private static long truncate(double x) {
+        return (long) x;
     }
 }
-
