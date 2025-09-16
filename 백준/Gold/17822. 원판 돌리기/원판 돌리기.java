@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.*;
-import java.util.stream.*;
 
 public class Main {
 
@@ -8,186 +7,249 @@ public class Main {
             new InputStreamReader(System.in)
     );
 
-    private static int N, M;
-    private static int[][] plates;
+    private static int N, M, T;
+    private static int[][] numbers;
     private static Command[] commands;
 
+    private static final int[]
+            dr = {0, 0, 1, -1},
+            dc = {1, -1, 0, 0};
+
     private static void init() throws IOException {
+
         StringTokenizer st = new StringTokenizer(br.readLine());
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
-        int T = Integer.parseInt(st.nextToken());
+        T = Integer.parseInt(st.nextToken());
 
-        plates = new int[N][];
+        numbers = new int[N][];
         for (int i = 0; i < N; i++) {
-            int[] row = Arrays.stream(br.readLine().split(" "))
+            numbers[i] = Arrays.stream(br.readLine().split(" "))
                     .mapToInt(Integer::parseInt)
                     .toArray();
-            plates[i] = row;
         }
 
         commands = new Command[T];
         for (int i = 0; i < T; i++) {
             st = new StringTokenizer(br.readLine());
+
             int x = Integer.parseInt(st.nextToken());
             int d = Integer.parseInt(st.nextToken());
             int k = Integer.parseInt(st.nextToken());
-            commands[i] = new Command(
-                    x, (d == 0 ? DIR.LEFT : DIR.RIGHT),
-                    k
-            );
+            commands[i] = new Command(x, d, k);
         }
     }
 
     public static void main(String[] args) throws IOException {
+
         init();
 
-        for (Command cmd : commands) {
+        for (Command command : commands) {
 
-            int x = cmd.x;
+            rotateFor(command);
 
-            List<Integer> rotatingIndices = IntStream.range(0, N)
-                    .filter(i -> (i + 1) % x == 0)
-                    .boxed()
-                    .collect(Collectors.toList());
-
-            for (int index : rotatingIndices) {
-                int[] target = plates[index];
-                rotatePlate(target, cmd);
-            }
-
-            List<Cord> deletions = new ArrayList<>();
             boolean[][] visited = new boolean[N][M];
+            List<Traversal> netTraversals = new ArrayList<>();
 
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < M; j++) {
-                    int value = plates[i][j];
+            for (int r = 0; r < N; r++) {
+                for (int c = 0; c < M; c++) {
+                    int val = numbers[r][c];
 
-                    if (visited[i][j] || value == 0) {
-                        continue;
+                    if (val != 0 && !visited[r][c]) {
+                        Traversal traversal = travelOn(visited, r, c);
+                        if (traversal.hasAdjacent()) {
+                            netTraversals.add(traversal);
+                        }
                     }
 
-                    List<Cord> dst = new ArrayList<>();
-                    dfs(value, i, j, visited, dst);
-
-                    if (dst.size() > 1) {
-                        deletions.addAll(dst);
-                    }
                 }
             }
 
-            if (deletions.isEmpty()) {
-                processPlate(plates);
-            } else {
-                for (Cord cord : deletions) {
-                    int r = cord.r;
-                    int c = cord.c;
-                    plates[r][c] = 0;
+            if (netTraversals.isEmpty()) {
+                double avg = getAvg();
+
+                for (int r = 0; r < N; r++) {
+                    for (int c = 0; c < M; c++) {
+
+                        int val;
+                        if ((val = numbers[r][c]) == 0) {
+                            continue;
+                        }
+
+                        if (val > avg) {
+                            numbers[r][c]--;
+                        } else if (val < avg) {
+                            numbers[r][c]++;
+                        }
+                    }
                 }
+
+            } else {
+                netTraversals.stream()
+                        .flatMap(t -> t.getCords().stream())
+                        .forEach(c -> numbers[c.r][c.c] = 0);
             }
         }
 
-        int sum = Arrays.stream(plates).mapToInt(row -> Arrays.stream(row).sum()).sum();
+        int sum = Arrays.stream(numbers)
+                .mapToInt(r -> Arrays.stream(r).sum())
+                .sum();
+
         System.out.println(sum);
     }
 
-    private static void dfs(int value, int r, int c, boolean[][] visited, List<Cord> dst) {
+    private static void rotateFor(Command command) {
 
-        if (r < 0 || r >= visited.length) {
-            return;
-        }
+        int x = command.x;
+        int d = command.d;
+        int k = command.k;
 
-        if (c < 0) {
-            c = visited[r].length + c;
-        } else if (c >= visited[r].length) {
-            c = c - visited[r].length;
-        }
+        for (int r = 1; r <= N; r++) {
 
-        if (visited[r][c] || value != plates[r][c]) {
-            return;
-        }
+            if (r % x == 0) {
+                int[] row = numbers[r - 1];
 
-        dst.add(new Cord(r, c));
-        visited[r][c] = true;
-
-        dfs(value, r - 1, c, visited, dst);
-        dfs(value, r + 1, c, visited, dst);
-        dfs(value, r, c - 1, visited, dst);
-        dfs(value, r, c + 1, visited, dst);
-    }
-
-    private static void rotatePlate(int[] plate, Command command) {
-
-        DIR dir = command.d;
-        int step = command.k;
-        step = dir == DIR.RIGHT ? -step : step;
-
-        int[] tmp = new int[plate.length];
-        for (int i = 0; i < plate.length; i++) {
-            int val = plate[i];
-            int newIdx = (i + step) % plate.length;
-            newIdx = newIdx < 0 ? newIdx + plate.length : newIdx;
-            tmp[newIdx] = val;
-        }
-
-        System.arraycopy(tmp, 0, plate, 0, tmp.length);
-    }
-
-    private static void processPlate(int[][] plates) {
-        int sum = 0;
-
-        List<Cord> targets = new ArrayList<>();
-        for (int i = 0; i < plates.length; i++) {
-            for (int j = 0; j < plates[i].length; j++) {
-
-                int val = plates[i][j];
-                sum += val;
-
-                if (val != 0) {
-                    targets.add(new Cord(i, j));
+                switch (d) {
+                    case 0:
+                        shiftRight(row, k);
+                        break;
+                    case 1:
+                        shiftLeft(row, k);
+                        break;
+                    default:
+                        throw new IllegalStateException();
                 }
             }
         }
+    }
 
-        if (targets.isEmpty()) {
-            return;
+    private static void shiftRight(int[] row, int move) {
+
+        // [1, 2, 3, 4] --> [4, 1, 2, 3] --> [3, 4, 1, 2]
+
+        int len = row.length;
+
+        int[] tempArr = new int[len];
+        for (int i = 0; i < len; i++) {
+            int replaceI = i - move < 0 ? len + i - move : i - move;
+            tempArr[i] = row[replaceI];
         }
 
-        double avg = (double) sum / targets.size();
-        for (Cord cord : targets) {
+        System.arraycopy(tempArr, 0, row, 0, len);
+    }
+
+    private static void shiftLeft(int[] row, int move) {
+
+        // [1, 2, 3, 4] --> [2, 3, 4, 1] --> [3, 4, 1, 2]
+        int len = row.length;
+
+        int[] tempArr = new int[len];
+        for (int i = 0; i < len; i++) {
+            int replaceI = (i + move) % len;
+            tempArr[i] = row[replaceI];
+        }
+
+        System.arraycopy(tempArr, 0, row, 0, len);
+    }
+
+    private static boolean inRange(int r, int c) {
+        return r >= 0 && r < N && c >= 0 && c < M;
+    }
+
+    private static int adjustColumn(int c) {
+        return c < 0 ? M + c : c % M;
+    }
+
+    private static Traversal travelOn(boolean[][] visited, int initR, int initC) {
+
+        Traversal traversal = new Traversal();
+
+        Queue<Cord> q = new LinkedList<>();
+        q.add(new Cord(initR, initC));
+
+        int val = numbers[initR][initC];
+        visited[initR][initC] = true;
+
+        while (!q.isEmpty()) {
+            Cord cord = q.poll();
             int r = cord.r;
             int c = cord.c;
 
-            int val = plates[r][c];
+            traversal.addCord(cord);
 
-            if (avg > val) {
-                plates[r][c]++;
-            } else if (avg < val) {
-                plates[r][c]--;
+            for (int i = 0; i < 4; i++) {
+
+                int nextR = r + dr[i];
+                int nextC = adjustColumn(c + dc[i]);
+
+                if (
+                        !inRange(nextR, nextC) ||
+                        numbers[nextR][nextC] != val ||
+                        visited[nextR][nextC]
+                ) {
+                    continue;
+                }
+
+                visited[nextR][nextC] = true;
+                q.add(new Cord(nextR, nextC));
             }
         }
-    }
-}
 
-enum DIR {
-    LEFT, RIGHT
+        return traversal;
+    }
+
+    private static double getAvg() {
+        double sum = 0;
+        int count = 0;
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < M; c++) {
+                int val = numbers[r][c];
+
+                if (val != 0) {
+                    sum += val;
+                    count++;
+                }
+            }
+        }
+        return sum / count;
+    }
 }
 
 class Command {
 
-    int x, k;
-    DIR d;
+    final int x, d, k;
 
-    public Command(int x, DIR d, int k) {
+    public Command(int x, int d, int k) {
         this.x = x;
-        this.k = k;
         this.d = d;
+        this.k = k;
+    }
+}
+
+class Traversal {
+
+    final List<Cord> visitedCords;
+
+    public Traversal() {
+        visitedCords = new ArrayList<>();
+    }
+
+    public void addCord(Cord cord) {
+        visitedCords.add(cord);
+    }
+
+    public boolean hasAdjacent() {
+        return visitedCords.size() >= 2;
+    }
+
+    public List<Cord> getCords() {
+        return visitedCords;
     }
 }
 
 class Cord {
 
-    int r, c;
+    final int r, c;
 
     public Cord(int r, int c) {
         this.r = r;
