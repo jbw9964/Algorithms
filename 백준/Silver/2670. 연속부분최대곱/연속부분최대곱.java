@@ -24,13 +24,12 @@ public class Main {
 
         init();
 
-        double answer = 0;
+        double answer = numbers[0];
         double[] DP = new double[N];
-        DP[0] = numbers[0];
+        DP[0] = answer;
 
         for (int i = 1; i < N; i++) {
-            double num = numbers[i];
-            DP[i] = Math.max(num, num * DP[i - 1]);
+            DP[i] = Math.max(numbers[i], DP[i - 1] * numbers[i]);
             answer = Math.max(answer, DP[i]);
         }
 
