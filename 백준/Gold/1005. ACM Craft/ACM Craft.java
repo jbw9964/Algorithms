@@ -10,7 +10,8 @@ public class Main {
 
     private static int N, K, W;
     private static int[] costs;
-    private static List<Integer>[] reverseAdjacent;
+    private static int[] inDegrees;
+    private static List<Integer>[] graph;
 
     private static void init() throws IOException {
 
@@ -22,8 +23,10 @@ public class Main {
                 .mapToInt(Integer::parseInt)
                 .toArray();
 
+        inDegrees = new int[N];
+
         //noinspection unchecked
-        reverseAdjacent = IntStream.range(0, N)
+        graph = IntStream.range(0, N)
                 .mapToObj(i -> new ArrayList<>())
                 .toArray(List[]::new);
 
@@ -33,7 +36,8 @@ public class Main {
             int from = Integer.parseInt(st.nextToken()) - 1;
             int to = Integer.parseInt(st.nextToken()) - 1;
 
-            reverseAdjacent[to].add(from);
+            graph[from].add(to);
+            inDegrees[to]++;
         }
 
         W = Integer.parseInt(br.readLine());
@@ -48,30 +52,33 @@ public class Main {
         while (T-- > 0) {
             init();
 
+            Queue<Integer> q = new ArrayDeque<>(N);
             int[] table = new int[N];
-            table[W - 1] = costs[W - 1];
 
-            Queue<Integer> q = new ArrayDeque<>();
-            q.add(W - 1);
+            for (int i = 0; i < N; i++) {
+                if (inDegrees[i] == 0) {
+                    table[i] = costs[i];
+                    q.add(i);
+                }
+            }
 
             while (!q.isEmpty()) {
                 int curr = q.poll();
-                int tableVal = table[curr];
+                int currVal = table[curr];
 
-                for (int adjacent : reverseAdjacent[curr]) {
-                    int val = tableVal + costs[adjacent];
-                    if (val > table[adjacent]) {
-                        table[adjacent] = val;
-                        q.add(adjacent);
+                for (int adj : graph[curr]) {
+
+                    table[adj] = Math.max(
+                            table[adj], currVal + costs[adj]
+                    );
+
+                    if (--inDegrees[adj] == 0) {
+                        q.add(adj);
                     }
                 }
             }
 
-            int maxima = Arrays.stream(table)
-                    .max()
-                    .orElseThrow(RuntimeException::new);
-
-            answer.append(maxima).append("\n");
+            answer.append(table[W - 1]).append("\n");
         }
 
         System.out.println(answer.toString());
