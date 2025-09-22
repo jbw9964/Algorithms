@@ -1,46 +1,77 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
+import java.util.stream.*;
 
 public class Main {
 
     private static final BufferedReader br = new BufferedReader(
-        new InputStreamReader(System.in)
+            new InputStreamReader(System.in)
     );
 
+    private static String S, E, Q;
 
-    public static void main(String[] args) throws IOException, ParseException {
-        StringTokenizer tokenizer = new StringTokenizer(br.readLine());
+    private static List<Info> infos;
 
-        String Start, End, Close;
-        Start = tokenizer.nextToken();
-        End = tokenizer.nextToken();
-        Close = tokenizer.nextToken();
+    private static void init() throws IOException {
 
-        HashMap<String, Boolean> hashMap = new HashMap<>();
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        S = st.nextToken();
+        E = st.nextToken();
+        Q = st.nextToken();
 
-        String inputString;
-        while ((inputString = br.readLine()) != null) {
-            tokenizer = new StringTokenizer(inputString);
+        infos = new ArrayList<>();
 
-            String time = tokenizer.nextToken();
-            String id = tokenizer.nextToken();
+        String input;
 
-            if (time.compareTo(Start) <= 0)         hashMap.put(id, false);
-            else if (time.compareTo(End) < 0)       continue;
-            else if (time.compareTo(Close) <= 0)    {
-                if (hashMap.containsKey(id))        hashMap.put(id, true);
-            }
-            
-            else                                    break;
+        while ((input = br.readLine()) != null) {
+            st = new StringTokenizer(input);
+
+            String time = st.nextToken();
+            String nickname = st.nextToken();
+
+            infos.add(new Info(time, nickname));
         }
+    }
 
-        int count = 0;
-        for (boolean attendance : hashMap.values()) if (attendance) count++;
+    public static void main(String[] args) throws IOException {
 
-        System.out.println(count);
+        init();
+
+        Set<String> joinedMemberSet = infos.stream()
+                .filter(i -> i.beforeOrEqualThan(S))
+                .map(Info::getNickname)
+                .collect(Collectors.toSet());
+
+        Set<String> remainedMemberSet = infos.stream()
+                .filter(i -> i.afterOrEqualThan(E) && i.beforeOrEqualThan(Q))
+                .map(Info::getNickname)
+                .collect(Collectors.toSet());
+
+        joinedMemberSet.retainAll(remainedMemberSet);
+
+        int answer = joinedMemberSet.size();
+        System.out.println(answer);
+    }
+}
+
+class Info {
+
+    final String time, nickname;
+
+    public Info(String time, String nickname) {
+        this.time = time;
+        this.nickname = nickname;
+    }
+
+    public boolean beforeOrEqualThan(String time) {
+        return this.time.compareTo(time) <= 0;
+    }
+
+    public boolean afterOrEqualThan(String time) {
+        return this.time.compareTo(time) >= 0;
+    }
+
+    public String getNickname() {
+        return nickname;
     }
 }
