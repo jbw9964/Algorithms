@@ -91,23 +91,7 @@ public class Main {
 
         System.out.println(answer);
     }
-
-    private static boolean assignableWith(int baseR, int baseC, Sticker sticker) {
-
-        for (int iter = 0; iter < 4; iter++) {
-
-            List<Cord> stickerCords = sticker.getCords();
-
-            if (assignableWith(baseR, baseC, stickerCords)) {
-                return true;
-            }
-
-            sticker.rotate();
-        }
-
-        return false;
-    }
-
+    
     private static boolean assignableWith(int baseR, int baseC, List<Cord> cords)   {
 
         for (Cord cord : cords) {
