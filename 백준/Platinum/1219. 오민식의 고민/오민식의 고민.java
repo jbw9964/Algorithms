@@ -1,146 +1,110 @@
-import java.io.*;
 import java.util.*;
-import java.util.stream.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
+// The main method must be in a class named "Main".
+class Main {
+    static List<Edge> edge;
+    static long[] distance;
+    static final int INF = Integer.MAX_VALUE >> 2;
+    static int[][] graph;
+    static boolean[] visited;
 
-    private static final BufferedReader br = new BufferedReader(
-            new InputStreamReader(System.in)
-    );
-
-    private static int N, M, START, END;
-    private static List<Edge>[] graph;
-    private static long[] profits;
-
-    private static void init() throws IOException {
-
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        START = Integer.parseInt(st.nextToken());
-        END = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
-
-        String[] inputs = new String[M];
-        for (int i = 0; i < M; i++) {
-            inputs[i] = br.readLine();
-        }
-
-        profits = Arrays.stream(br.readLine().split(" "))
-                .mapToLong(Long::parseLong)
-                .toArray();
-
-        //noinspection unchecked
-        graph = IntStream.range(0, N)
-                .mapToObj(i -> new ArrayList<>())
-                .toArray(List[]::new);
-
-        for (String input : inputs) {
-
-            st = new StringTokenizer(input);
-
-            int from = Integer.parseInt(st.nextToken());
-            int to = Integer.parseInt(st.nextToken());
-            int travelCost = Integer.parseInt(st.nextToken());
-
-            long cost = profits[to] - travelCost;
-
-            graph[from].add(new Edge(to, cost));
-        }
-    }
+    static int E;
 
     public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        init();
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int N = Integer.parseInt(st.nextToken());
+        int S = Integer.parseInt(st.nextToken());
+        E = Integer.parseInt(st.nextToken());
+        int M = Integer.parseInt(st.nextToken());
 
-        long[] profitTable = getProfitTable(START);
-        long profit = profitTable[END];
+        edge = new ArrayList<>();
+        graph = new int[N][N];
+        for(int i = 0; i < M; i++){
+            st = new StringTokenizer(br.readLine());
 
-        if (profit == Integer.MIN_VALUE) {
-            System.out.println("gg");
-            return;
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
+            int dist = Integer.parseInt(st.nextToken());
+
+            edge.add(new Edge(a, b, dist));
+            graph[a][b] = 1;
         }
 
-        long[] copy = Arrays.copyOf(profitTable, profitTable.length);
-        updateTable(copy);
+        int[] city = new int[N];
+        st = new StringTokenizer(br.readLine());
+        for(int i = 0; i < N; i++) city[i] = Integer.parseInt(st.nextToken());
+        for(int i = 0; i < M; i++) edge.get(i).dist -= city[edge.get(i).v];
 
-        int[] negativeCycleCandidates = IntStream.range(0, N)
-                .filter(i -> profitTable[i] != copy[i])
-                .toArray();
+        distance = new long[N]; Arrays.fill(distance, INF);
+        visited = new boolean[N];
+        if(!BellMan_Ford(S)) bw.write("gg");
+        else if(BellMan_Ford_Check()) bw.write((city[S] - distance[E]) + "");
+        else bw.write("Gee");
 
-        boolean[] visited = new boolean[N];
-        Queue<Integer> q = new ArrayDeque<>();
-        for (int c : negativeCycleCandidates) {
-            visited[c] = true;
-            q.add(c);
-        }
+        bw.close();
+        br.close();
+    }
 
-        while (!q.isEmpty()) {
-            int curr = q.poll();
+    static boolean BellMan_Ford(int start){
+        distance[start] = 0;
 
-            if (curr == END) {
-                System.out.println("Gee");
-                return;
-            }
-
-            for (Edge adj : graph[curr]) {
-                if (!visited[adj.to]) {
-                    visited[adj.to] = true;
-                    q.add(adj.to);
+        for(int i = 0; i < distance.length - 1; i++){
+            for(Edge e : edge){
+                if(distance[e.u] == INF) continue;
+                if(distance[e.u] + e.dist < distance[e.v]){
+                    distance[e.v] = distance[e.u] + e.dist;
                 }
             }
         }
 
-        System.out.println(profitTable[END]);
+        return (distance[E] != INF);
     }
 
-    private static long[] getProfitTable(int from) {
+    static boolean BellMan_Ford_Check(){
+        long[] prev = new long[distance.length];
+        for(int i = 0; i < distance.length; i++) prev[i] = distance[i];
 
-        long[] profitTable = new long[N];
-        Arrays.fill(profitTable, Integer.MIN_VALUE);
-        profitTable[from] = profits[from];
-
-        for (int iter = 0; iter < N - 1; iter++) {
-            if (!updateTable(profitTable)) {
-                return profitTable;
+        for(Edge e : edge){
+            if(distance[e.u] == INF) continue;
+            if(distance[e.u] + e.dist < distance[e.v]){
+                distance[e.v] = distance[e.u] + e.dist;
             }
         }
 
-        return profitTable;
-    }
-
-    private static boolean updateTable(long[] table) {
-
-        boolean updated = false;
-        for (int v = 0; v < N; v++) {
-
-            if (table[v] == Integer.MIN_VALUE) {
-                continue;
-            }
-
-            long base = table[v];
-            for (Edge adj : graph[v]) {
-
-                int to = adj.to;
-                long cost = base + adj.cost;
-
-                if (table[to] <= cost) {
-                    table[to] = cost;
-                    updated = true;
-                }
+        for(int i = 0; i < distance.length; i++) {
+            if(prev[i] != distance[i]){
+                Arrays.fill(visited, false);
+                if(canReach(i, E)) return false;
             }
         }
+        return true;
+    }
 
-        return updated;
+    static boolean canReach(int u, int v){
+        if(u == v) return true;
+
+        visited[u] = true;
+        for(int i = 0; i < distance.length; i++){
+            if(!visited[i] && graph[u][i] == 1 && canReach(i, v)) return true;
+        }
+
+        return false;
     }
 }
 
-class Edge {
+class Edge{
+    int u;
+    int v;
+    int dist;
 
-    final int to;
-    final long cost;
-
-    public Edge(int to, long cost) {
-        this.to = to;
-        this.cost = cost;
+    Edge(int u, int v, int dist) {
+        this.u = u;
+        this.v = v;
+        this.dist = dist;
     }
 }
