@@ -8,135 +8,108 @@ public class Main {
             new InputStreamReader(System.in)
     );
 
-    private static int N, EDGE_COST_TOTAL;
-    private static int[][] costTable;
+    private static int N;
+    private static PriorityQueue<Edge> edgePq;
     private static int[] parents;
-    private static final Set<Integer> visited = new HashSet<>();
+    private static long TOTAL_SUM;
 
     private static void init() throws IOException {
+
         N = Integer.parseInt(br.readLine());
 
-        costTable = new int[N][];
+        edgePq = new PriorityQueue<>();
+        parents = IntStream.range(0, N).toArray();
 
         for (int i = 0; i < N; i++) {
-            costTable[i] = br.readLine().chars()
-                    .map(Main::convertCost)
-                    .toArray();
+            char[] costTable = br.readLine().toCharArray();
 
-            EDGE_COST_TOTAL += Arrays.stream(costTable[i]).sum();
-        }
+            for (int j = 0; j < costTable.length; j++) {
 
-        for (int i = 0; i < N; i++) {
-            for (int j = i + 1; j < N; j++) {
+                char c = costTable[j];
+                if (c == '0') {
+                    continue;
+                }
 
-                int cost1 = costTable[i][j];
-                int cost2 = costTable[j][i];
-
-                int minima = cost1 != 0 && cost2 != 0 ?
-                        Math.min(cost1, cost2) :
-                        cost1 == 0 ? cost2 : cost1;
-
-                costTable[i][j] = minima;
-                costTable[j][i] = minima;
+                long len = toLen(c);
+                edgePq.add(new Edge(i, j, len));
+                TOTAL_SUM += len;
             }
         }
-
-        parents = IntStream.range(0, N + 1).toArray();
     }
 
-    private static int convertCost(int ch) {
-        return ch == '0' ? 0 :
-                ch >= 'a' ?
-                        ch - 'a' + 1 :
-                        ch - 'A' + 27;
+    private static long toLen(char c) {
+        if (c >= 'a' && c <= 'z') {
+            return c - 'a' + 1;
+        } else if (c >= 'A' && c <= 'Z') {
+            return c - 'A' + 27;
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
-    public static int findRootParent(int v) {
-        return v != parents[v] ?
-                (parents[v] = findRootParent(parents[v])) : v;
+    private static int findParent(int v) {
+        return parents[v] == v ? v : (parents[v] = findParent(parents[v]));
     }
-
 
     public static void main(String[] args) throws IOException {
 
         init();
 
-        int cost = getMstEdgeCosts();
+        int edgeCnt = 0;
+        long edgeCostSum = 0;
 
-        System.out.println(visited.size() != N ?
-                -1 : EDGE_COST_TOTAL - cost
-        );
+        while (!edgePq.isEmpty() && edgeCnt < N - 1) {
 
-    }
+            Edge edge = edgePq.poll();
+            int v1 = edge.v1;
+            int v2 = edge.v2;
 
-    private static int getMstEdgeCosts()    {
-        int cost = 0;
+            int p1 = findParent(v1);
+            int p2 = findParent(v2);
 
-        PriorityQueue<Edge> pq = new PriorityQueue<>();
-        int[] edgeCostCache = new int[N];
-        Arrays.fill(edgeCostCache, Integer.MAX_VALUE);
-        visited.add(0);
-
-        for (int next = 1; next < N; next++) {
-            int nextCost = costTable[0][next];
-
-            if (nextCost != 0)  {
-                edgeCostCache[next] = nextCost;
-
-                pq.add(new Edge(0, next, nextCost));
-            }
-        }
-
-
-        while (!pq.isEmpty() && visited.size() < N)   {
-
-            Edge edge = pq.poll();
-            int from = edge.from, to = edge.to;
-
-            if (visited.contains(to))   {
+            if (p1 == p2) {
                 continue;
             }
 
-            int parentFrom = findRootParent(from);
-            int parentTo = findRootParent(to);
+            int root = Math.min(p1, p2);
+            int child = Math.max(p1, p2);
 
-            if (parentFrom == parentTo) {
-                continue;
-            }
+            parents[child] = root;
 
-            cost += edge.cost;
-            visited.add(to);
-            parents[parentTo] = parentFrom;
-
-            for (int next = 1; next < N; next++) {
-                int nextCost = costTable[to][next];
-
-                if (visited.contains(next) || nextCost == 0 ||
-                        nextCost > edgeCostCache[next])    {
-                    continue;
-                }
-
-                edgeCostCache[next] = nextCost;
-                pq.add(new Edge(to, next, nextCost));
-            }
+            edgeCostSum += edge.cost;
+            edgeCnt++;
         }
 
-        return cost;
+        if (edgeCnt < N - 1) {
+            System.out.println(-1);
+        } else {
+            System.out.println(TOTAL_SUM - edgeCostSum);
+        }
     }
 }
 
 class Edge implements Comparable<Edge> {
-    int from, to;
-    int cost;
 
-    public Edge(int from, int to, int cost) {
-        this.from = from;
-        this.to = to;
+    final int v1, v2;
+    final long cost;
+
+    public Edge(int v1, int v2, long cost) {
+        this.v1 = v1;
+        this.v2 = v2;
         this.cost = cost;
     }
 
     @Override
     public int compareTo(Edge o) {
-        return cost - o.cost;
+        return Long.compare(cost, o.cost);
+    }
+
+    @Override
+    public String toString() {
+        return "Edge{" +
+               "v1=" + v1 +
+               ", v2=" + v2 +
+               ", cost=" + cost +
+               '}';
     }
 }
