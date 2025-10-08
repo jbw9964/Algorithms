@@ -9,98 +9,134 @@ public class Main {
     );
 
     private static int N;
-    private static int[] parents;
-    private static long[] values;
+    private static List<Ratio> ratioList;
+    private static List<Integer>[] neighbours;
+    private static long[] answerRatio;
 
-    public static void main(String[] args) throws IOException {
+    private static void init() throws IOException {
 
         N = Integer.parseInt(br.readLine());
 
-        parents = IntStream.range(0, N).toArray();
-        values = new long[N];
-
+        ratioList = new ArrayList<>();
         for (int i = 0; i < N - 1; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine());
-
-            // : a / b = p / q
             int a = Integer.parseInt(st.nextToken());
             int b = Integer.parseInt(st.nextToken());
-            long p = Integer.parseInt(st.nextToken());
-            long q = Integer.parseInt(st.nextToken());
-            //long gcd = gcd(p, q);
-            //p /= gcd;
-            //q /= gcd;
+            long p = Long.parseLong(st.nextToken());
+            long q = Long.parseLong(st.nextToken());
 
-            if (values[a] == values[b] && values[a] == 0) {
-                values[a] = p;
-                values[b] = q;
-            }
+            long gcd = gcd(p, q);
+            p /= gcd;
+            q /= gcd;
 
-            else if (values[a] == 0) {
-                values[a] = p * values[b];
-                multiplyGivenToGroup(b, q);
-            }
-
-            else if (values[b] == 0) {
-                values[b] = q * values[a];
-                multiplyGivenToGroup(a, p);
-            }
-
-            else {
-                long lcm = lcm(values[a], values[b]);
-                long mulA = lcm / values[a];
-                long mulB = lcm / values[b];
-
-                // set values[a] & values[b] equal for convenience
-                multiplyGivenToGroup(a, mulA);
-                multiplyGivenToGroup(b, mulB);
-
-                // adjust ratios
-                multiplyGivenToGroup(a, p);
-                multiplyGivenToGroup(b, q);
-            }
-
-            int p1 = findParent(a);
-            int p2 = findParent(b);
-            parents[Math.max(p1, p2)] = Math.min(p1, p2);
-        }
-
-        long gcd = Arrays.stream(values).reduce(values[0], Main::gcd);
-        for (long val : values) {
-            System.out.print(val / gcd + " ");
-        }
-        System.out.println();
-    }
-
-    private static void multiplyGivenToGroup(int indexInGroup, long mul) {
-        if (mul > 1) {
-            int parent = findParent(indexInGroup);
-            IntStream.range(0, N)
-                    .filter(i -> findParent(i) == parent)
-                    .forEach(i -> values[i] *= mul);
+            ratioList.add(new Ratio(a, b, p, q));
         }
     }
 
-    private static int findParent(int i) {
-        return parents[i] = i == parents[i] ?
-                parents[i] : findParent(parents[i]);
+    public static void main(String[] args) throws IOException {
+
+        init();
+
+        answerRatio = new long[N];
+        Arrays.fill(answerRatio, 1L);
+
+        //noinspection unchecked
+        neighbours = IntStream.range(0, N)
+                .mapToObj(i -> new ArrayList<>())
+                .toArray(List[]::new);
+
+        boolean[] visited = new boolean[N];
+
+        for (Ratio ratio : ratioList) {
+
+            int a = ratio.a, b = ratio.b;
+            long p = ratio.p, q = ratio.q;
+
+            long lcm = lcm(answerRatio[a], answerRatio[b]);
+            long targetA = p * lcm;
+            long mulA = targetA / gcd(targetA, answerRatio[a]);
+
+            long targetB = q * lcm;
+            long mulB = targetB / gcd(targetB, answerRatio[b]);
+
+            propagateRatioFrom(a, mulA, visited);
+            propagateRatioFrom(b, mulB, visited);
+
+            neighbours[a].add(b);
+            neighbours[b].add(a);
+
+            Arrays.fill(visited, false);
+        }
+
+        long gcd = Arrays.stream(answerRatio)
+                .reduce(Main::gcd)
+                .orElseThrow(RuntimeException::new);
+
+        String answer = Arrays.stream(answerRatio)
+                .map(r -> r / gcd)
+                .mapToObj(String::valueOf)
+                .collect(Collectors.joining(" "));
+
+        System.out.println(answer);
     }
 
-    private static long lcm(long a, long b)    {
-        long gcd = gcd(a, b);
-        return (a / gcd) * (b / gcd) * gcd;
+    private static void propagateRatioFrom(
+            int from, long multiplier, boolean[] visited
+    ) {
+
+        if (multiplier == 1L) {
+            return;
+        }
+
+        answerRatio[from] *= multiplier;
+        visited[from] = true;
+
+        for (int neighbor : neighbours[from]) {
+            if (!visited[neighbor]) {
+                propagateRatioFrom(neighbor, multiplier, visited);
+            }
+        }
     }
 
     private static long gcd(long a, long b) {
-        long max = Math.max(a, b);
-        long min = Math.min(a, b);
 
-        long mod;
-        while ((mod = max % min) != 0)  {
-            max = min;
-            min = mod;
+        if (a < b) {
+            return gcd(b, a);
         }
 
-        return min;
+        long mod;
+        while ((mod = a % b) != 0) {
+            a = b;
+            b = mod;
+        }
+
+        return b;
+    }
+
+    private static long lcm(long a, long b) {
+        return (a * b) / gcd(a, b);
+    }
+}
+
+class Ratio {
+
+    final int a, b;
+    final long p, q;
+
+    public Ratio(int a, int b, long p, long q) {
+        this.a = a;
+        this.b = b;
+        this.p = p;
+        this.q = q;
+    }
+
+    @Override
+    public String toString() {
+        return "Ratio{" +
+               "a=" + a +
+               ", b=" + b +
+               ", p=" + p +
+               ", q=" + q +
+               '}';
     }
 }
