@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.*;
-import java.util.function.*;
 import java.util.stream.*;
 
 public class Main {
@@ -11,58 +10,49 @@ public class Main {
 
     private static int N, M;
     private static int[] cranes;
-    private static TreeSet<Integer> weightTree;
-    private static Map<Integer, Integer> cntMap;
+    private static List<Integer> boxes;
 
     private static void init() throws IOException {
         N = Integer.parseInt(br.readLine());
         cranes = Arrays.stream(br.readLine().split(" "))
-                .mapToInt(Integer::parseInt)
-                .sorted()
+                .map(Integer::parseInt)
+                .sorted(Comparator.reverseOrder())
+                .mapToInt(Integer::intValue)
                 .toArray();
 
         M = Integer.parseInt(br.readLine());
-        List<Integer> weights = Arrays.stream(br.readLine().split(" "))
-                .mapToInt(Integer::parseInt)
-                .sorted()
-                .boxed()
+        boxes = Arrays.stream(br.readLine().split(" "))
+                .map(Integer::parseInt)
+                .sorted(Comparator.reverseOrder())
                 .collect(Collectors.toList());
-
-        weightTree = new TreeSet<>();
-        weightTree.addAll(weights);
-        cntMap = weights.stream().collect(
-                Collectors.groupingBy(w -> w, Collectors.summingInt(w -> 1))
-        );
     }
-
 
     public static void main(String[] args) throws IOException {
 
         init();
 
+        if (boxes.isEmpty() || cranes[0] < boxes.get(0)) {
+            System.out.println(-1);
+            return;
+        }
+
         int answer = 0;
+        while (!boxes.isEmpty())    {
 
-        while (!weightTree.isEmpty())   {
+            int ci = 0;
+            int bi = 0;
+            while (ci < cranes.length && bi < boxes.size())  {
 
-            int cnt = 0;
-            for (int crane : cranes) {
+                int crane = cranes[ci];
+                int box = boxes.get(bi);
 
-                Integer floor = weightTree.floor(crane);
-
-                if (floor == null)  {
-                    continue;
+                if (crane >= box)   {
+                    boxes.remove(bi);
+                    ci++;
                 }
-
-                cntMap.put(floor, cntMap.get(floor) - 1);
-                if (cntMap.get(floor) == 0) {
-                    weightTree.remove(floor);
+                else {
+                    bi++;
                 }
-                cnt++;
-            }
-
-            if (cnt == 0)   {
-                answer = -1;
-                break;
             }
 
             answer++;
@@ -70,5 +60,4 @@ public class Main {
 
         System.out.println(answer);
     }
-
 }
