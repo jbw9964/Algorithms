@@ -1,31 +1,24 @@
 import java.io.*;
 import java.util.*;
 
-class Main {
+public class Main {
 
     private static final BufferedReader br = new BufferedReader(
             new InputStreamReader(System.in)
     );
 
-    private static int R, C, K;
+    private static int K, R, C;
     private static int[][] table;
-    private static boolean[][][] visit;
 
     private static final int[]
-            drM = {0, 0, 1, -1},
-            dcM = {1, -1, 0, 0},
-            drH = {1, 2, 2, 1, -1, -2, -2, -1},
-            dcH = {2, 1, -1, -2, -2, -1, 1, 2};
-
-    private static boolean inRange(int r, int c) {
-        return (r >= 0 && r < R && c >= 0 && c < C);
-    }
-
-    private static boolean moveable(int r, int c, int jumps) {
-        return inRange(r, c) && table[r][c] == 0 && !visit[r][c][jumps];
-    }
+            dr1 = {0, 0, -1, 1},
+            dc1 = {-1, 1, 0, 0};
+    private static final int[]
+            dr2 = {-2, -1, 1, 2, 2, 1, -1, -2},
+            dc2 = {1, 2, 2, 1, -1, -2, -2, -1};
 
     private static void init() throws IOException {
+
         K = Integer.parseInt(br.readLine());
 
         StringTokenizer st = new StringTokenizer(br.readLine());
@@ -33,8 +26,6 @@ class Main {
         R = Integer.parseInt(st.nextToken());
 
         table = new int[R][];
-        visit = new boolean[R][C][K + 1];
-
         for (int i = 0; i < R; i++) {
             table[i] = Arrays.stream(br.readLine().split(" "))
                     .mapToInt(Integer::parseInt)
@@ -42,49 +33,74 @@ class Main {
         }
     }
 
+    private static boolean inRange(int r, int c) {
+        return r >= 0 && r < R && c >= 0 && c < C;
+    }
+
     public static void main(String[] args) throws IOException {
+
         init();
 
-        System.out.println(bfs());
+        int answer = solve();
+
+        System.out.println(answer);
     }
 
+    @SuppressWarnings("DuplicatedCode")
+    private static int solve() {
 
-    private static int bfs() {
+        boolean[][][] visited = new boolean[K + 1][R][C];
+        visited[0][0][0] = true;
 
         Queue<State> q = new LinkedList<>();
-
-        Consumer appendNextToQ = (curr, dr, dc, jumps) -> {
-            for (int i = 0; i < dr.length; i++) {
-                int r = curr.r + dr[i];
-                int c = curr.c + dc[i];
-
-                if (moveable(r, c, jumps)) {
-                    visit[r][c][jumps] = true;
-                    q.add(new State(r, c, curr.steps + 1, jumps));
-                }
-            }
-        };
-
-        return bfs(q, appendNextToQ);
-    }
-
-    private static int bfs(Queue<State> q, Consumer tasker)  {
-        visit[0][0][K] = true;
-        q.add(new State(0, 0, 0, K));
+        q.add(new State(0, 0, 0, 0));
 
         while (!q.isEmpty()) {
 
-            State curr = q.poll();
-            int jumps = curr.remainJumps;
+            State s = q.poll();
+            int moves = s.moves;
+            int usedHops = s.usedHops;
 
-            if (curr.r == R - 1 && curr.c == C - 1) {
-                return curr.steps;
+            if (s.r == R - 1 && s.c == C - 1) {
+                return moves;
             }
 
-            tasker.doTask(curr, drM, dcM, jumps);
+            for (int i = 0; i < dr1.length; i++) {
+                int r = s.r + dr1[i];
+                int c = s.c + dc1[i];
 
-            if (jumps > 0)  {
-                tasker.doTask(curr, drH, dcH, jumps - 1);
+                if (
+                        !inRange(r, c) ||
+                        table[r][c] != 0 ||
+                        visited[usedHops][r][c]
+                ) {
+                    continue;
+                }
+
+                visited[usedHops][r][c] = true;
+                q.add(new State(r, c, usedHops, moves + 1));
+            }
+
+            if (usedHops >= K)   {
+                continue;
+            }
+
+            int nextHop = usedHops + 1;
+
+            for (int i = 0; i < dr2.length; i++) {
+                int r = s.r + dr2[i];
+                int c = s.c + dc2[i];
+
+                if (
+                        !inRange(r, c) ||
+                        table[r][c] != 0 ||
+                        visited[nextHop][r][c]
+                ) {
+                    continue;
+                }
+
+                visited[nextHop][r][c] = true;
+                q.add(new State(r, c, nextHop, moves + 1));
             }
         }
 
@@ -94,17 +110,23 @@ class Main {
 
 class State {
 
-    int r, c;
-    int steps, remainJumps;
+    final int r, c, usedHops;
+    final int moves;
 
-    public State(int r, int c, int steps, int remainJumps) {
+    public State(int r, int c, int usedHops, int moves) {
         this.r = r;
         this.c = c;
-        this.steps = steps;
-        this.remainJumps = remainJumps;
+        this.usedHops = usedHops;
+        this.moves = moves;
     }
-}
 
-interface Consumer {
-    void doTask(State curr, int[] dr, int[] dc, int jumps);
+    @Override
+    public String toString() {
+        return "State{" +
+               "r=" + r +
+               ", c=" + c +
+               ", usedHops=" + usedHops +
+               ", moves=" + moves +
+               '}';
+    }
 }
