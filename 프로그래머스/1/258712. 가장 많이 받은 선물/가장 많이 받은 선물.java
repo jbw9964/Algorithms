@@ -1,60 +1,89 @@
-
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.*;
 
 class Solution {
-    public int solution(String[] friends, String[] gifts) {
-        
-        HashMap<String, Integer> friendIndex = new HashMap<>();
-        
-        for (int i = 0; i < friends.length; i++)
-        friendIndex.put(friends[i], i);
-        
-        int[][] giftExchangeTable = new int[friends.length][friends.length];
-        HashMap<String, Integer> giverHashMap = new HashMap<>();
-        HashMap<String, Integer> takerHashMap = new HashMap<>();
 
-        for (String exchange : gifts)   {
-            String giver = exchange.split(" ")[0];
-            String taker = exchange.split(" ")[1];
+    private static int N;
+    private static Map<String, Integer> indexMap;
+    private static int[][] giftTable;
 
-            giftExchangeTable[friendIndex.get(giver)][friendIndex.get(taker)]++;
-            giverHashMap.put(giver, giverHashMap.getOrDefault(giver, 0) + 1);
-            takerHashMap.put(taker, takerHashMap.getOrDefault(taker, 0) + 1);
+    private static void init(String[] friends, String[] gifts) {
+        N = friends.length;
+        indexMap = new HashMap<>();
+
+        for (int i = 0; i < N; i++) {
+            indexMap.put(friends[i], i);
         }
 
-        HashMap<String, Integer> nextMonthTakerHashMap = new HashMap<>();
-        for (int i = 0; i < friends.length - 1; i++)    {
-            String giver = friends[i];
+        giftTable = new int[N][N];
+        for (String gift : gifts) {
 
-            for (int j = i + 1; j < friends.length; j++)    {
-                String taker = friends[j];
+            String[] tmp = gift.split(" ");
+            String from = tmp[0];
+            String to = tmp[1];
 
-                int giverIndex = friendIndex.get(giver);
-                int takerIndex = friendIndex.get(taker);
+            int fI = indexMap.get(from);
+            int tI = indexMap.get(to);
 
-                int giverValue = giftExchangeTable[giverIndex][takerIndex];
-                int takerValue = giftExchangeTable[takerIndex][giverIndex];
+            giftTable[fI][tI]++;
+        }
+    }
 
-                if (giverValue == takerValue) {
-                    int giverCredit = giverHashMap.getOrDefault(giver, 0) - takerHashMap.getOrDefault(giver, 0);
-                    int takerCredit = giverHashMap.getOrDefault(taker, 0) - takerHashMap.getOrDefault(taker, 0);
+    public int solution(String[] friends, String[] gifts) {
 
-                    if (giverCredit == takerCredit)     continue;
+        init(friends, gifts);
 
-                    String person = giverCredit > takerCredit ? giver : taker;
-                    nextMonthTakerHashMap.put(person, nextMonthTakerHashMap.getOrDefault(person, 0) + 1);
-                }
-                else    {
-                    String person = giverValue > takerValue ? giver : taker;
-                    nextMonthTakerHashMap.put(person, nextMonthTakerHashMap.getOrDefault(person, 0) + 1);
+        int[] answer = new int[N];
+
+        for (int i = 0; i < N - 1; i++) {
+            String fI = friends[i];
+
+            for (int j = i + 1; j < N; j++) {
+                String fJ = friends[j];
+
+                int giveI = giftTable[i][j];
+                int giveJ = giftTable[j][i];
+
+                if (giveI > giveJ) {
+                    answer[i]++;
+                } else if (giveJ > giveI) {
+                    answer[j]++;
+                } else {
+
+                    int scoreI = getGiftScore(fI);
+                    int scoreJ = getGiftScore(fJ);
+
+                    if (scoreI > scoreJ) {
+                        answer[i]++;
+                    } else if (scoreJ > scoreI) {
+                        answer[j]++;
+                    }
                 }
             }
         }
-        
-        int answer = 0;
-        for (Integer value : nextMonthTakerHashMap.values())
-        answer = answer < value ? value : answer;
 
-        return answer;
+        return Arrays.stream(answer).max().orElseThrow(RuntimeException::new);
+    }
+
+    private static int getGiftScore(String name) {
+        int give = countGive(name);
+        int get = countGet(name);
+        return give - get;
+    }
+
+    private static int countGive(String from) {
+        int fI = indexMap.get(from);
+        return Arrays.stream(giftTable[fI]).sum();
+    }
+
+    private static int countGet(String to) {
+        int tI = indexMap.get(to);
+
+        int sum = 0;
+        for (int j = 0; j < N; j++) {
+            sum += giftTable[j][tI];
+        }
+
+        return sum;
     }
 }
