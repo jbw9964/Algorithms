@@ -1,129 +1,198 @@
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.List;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Arrays;
+import java.util.*;
 
 class Solution {
-    private static int MAX_COUNT = Integer.MIN_VALUE;
-    private static int[] MAX_SELECTION = null;
+
+    private static List<Index> indices;
+
+    private static void init(int[][] dice) {
+        indices = Combinator.getCombination(dice.length);
+    }
 
     public int[] solution(int[][] dice) {
-        int N = dice.length;
-        int R = N / 2;
+        init(dice);
 
-        Queue<int[]>[] indexCombinations = getPairIndexComb(N, R);
-        Queue<int[]> indexCombA = indexCombinations[0];
-        Queue<int[]> indexCombB = indexCombinations[1];
+        double maxWinRatio = -1.d;
+        Index answer = null;
 
-        while (!indexCombA.isEmpty())   {
-            int[] selectionA = indexCombA.poll();
-            int[] selectionB = indexCombB.poll();
+        for (Index i : indices) {
 
-            Queue<Integer> A = getPermute(dice, selectionA);
-            Queue<Integer> B = getPermute(dice, selectionB);
+            List<Integer> normalCaseIndices = i.normalCase;
+            List<Integer> oppositeCaseIndices = i.oppositeCase;
 
-            int count = 0;
-            while (!A.isEmpty() && !B.isEmpty())    {
-                Integer peek;
-                while ((peek = B.peek()) != null && A.peek() <= peek)
-                B.poll();
+            List<Integer> normalCaseRecord = new ArrayList<>();
+            List<Integer> oppositeCaseRecord = new ArrayList<>();
 
-                count += B.size();
-                A.poll();
+            for (int ni : normalCaseIndices) {
+                int[] d = dice[ni];
+                recordCase(d, normalCaseRecord);
             }
 
-            if (MAX_COUNT < count)  {
-                MAX_COUNT = count;
-                MAX_SELECTION = selectionA;
+            for (int oi : oppositeCaseIndices) {
+                int[] d = dice[oi];
+                recordCase(d, oppositeCaseRecord);
+            }
+
+            Report report = new Report(normalCaseRecord, oppositeCaseRecord);
+            double winRatio = report.calcWinRatio();
+
+            if (winRatio > maxWinRatio) {
+                maxWinRatio = winRatio;
+                answer = i;
             }
         }
-        
-        int[] answer = new int[R];
-        for (int i = 0; i < R; i++)
-        answer[i] = MAX_SELECTION[i] + 1;
 
-        Arrays.sort(answer);
+        if (answer == null) {
+            throw new RuntimeException();
+        }
 
-        return answer;
+        return answer.normalCase.stream().mapToInt(i -> i + 1).sorted().toArray();
     }
 
-    @SuppressWarnings("unchecked")
-    private static Queue<int[]>[] getPairIndexComb(int n, int r)    {
-        Queue<int[]>[] result = new Queue[] {
-            new LinkedList<>(),
-            new LinkedList<>()
-        };
-        
-        storePairIndexComb(
-            result[0], result[1], new boolean[n], 
-            n, r, 0, 0
-        );
+    private static void recordCase(int[] dice, List<Integer> dst) {
 
-        return result;
-    }
-    private static void storePairIndexComb(
-        Queue<int[]> dst1, Queue<int[]> dst2, boolean[] visitTable,
-        int n, int r, int index, int len
-    )
-    {
-        if (len == r)   {
-            int cursor1 = 0;
-            int cursor2 = 0;
+        int size = dst.size();
 
-            int[] indices1 = new int[r];
-            int[] indices2 = new int[r];
-            for (int i = 0; i < visitTable.length; i++) {
-                if (visitTable[i])  indices1[cursor1++] = i;
-                else                indices2[cursor2++] = i;
+        if (size == 0) {
+            for (int d : dice) {
+                dst.add(d);
             }
-            
-            dst1.add(indices1);
-            dst2.add(indices2);
-
             return;
         }
 
-        for (int i = index; i < n; i++) {
-            visitTable[i] = true;
-            storePairIndexComb(
-                dst1, dst2, visitTable, 
-                n, r, i + 1, len + 1
-            );
-            visitTable[i] = false;
-        }
-
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Queue<Integer> getPermute(int[][] dice, int[] selection)  {
-        List<Integer> result = getPermute(new LinkedList<>(), dice, selection, 0, 0);
-        Collections.sort(result, new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return o2.compareTo(o1);
+        while (size-- > 0) {
+            int val = dst.remove(0);
+            for (int d : dice) {
+                dst.add(val + d);
             }
-        });
-
-        return (Queue<Integer>) result;
+        }
     }
-    private static List<Integer> getPermute(
-        List<Integer> list, int[][] dice, 
-        int[] selection, int index, int value
-    ) {
 
-        if (index == selection.length)  {
-            list.add(value);
-            return null;
+}
+
+class Report {
+
+    final long winCnt, looseCnt, drawCnt;
+
+    public Report(List<Integer> primaryRecord, List<Integer> secondaryRecord) {
+
+        int[] secondary = secondaryRecord.stream()
+                .mapToInt(Integer::intValue)
+                .sorted()
+                .toArray();
+
+        long wc, lc, dc;
+        wc = lc = dc = 0;
+
+        for (int pr : primaryRecord) {
+            int lowerCnt = countLower(pr, secondary);
+            int higherCnt = countHigher(pr, secondary);
+            int equalCnt = secondary.length - lowerCnt - higherCnt;
+
+            wc += lowerCnt;
+            lc += higherCnt;
+            dc += equalCnt;
         }
 
-        int[] availableValues = dice[selection[index]];
-        for (int i = 0; i < availableValues.length; i++)    {
-            int add = availableValues[i];
-            getPermute(list, dice, selection, index + 1, value + add);
+        winCnt = wc;
+        looseCnt = lc;
+        drawCnt = dc;
+    }
+
+    public double calcWinRatio() {
+        long total = winCnt + looseCnt + drawCnt;
+        return (double) winCnt / (double) total;
+    }
+
+    private static int countLower(int key, int[] arr) {
+
+        int i = Arrays.binarySearch(arr, key);
+        int insertionPoint;
+
+        if (i >= 0) {
+            while (i - 1 > 0 && arr[i - 1] == key) {
+                i--;
+            }
+            insertionPoint = i;
+
+        } else {
+            insertionPoint = -(i + 1);
         }
 
-        return list;
+        return insertionPoint;
+    }
+
+    private static int countHigher(int key, int[] arr) {
+
+        int i = Arrays.binarySearch(arr, key);
+        int insertionPoint;
+
+        if (i >= 0) {
+            while (i + 1 < arr.length && arr[i + 1] == key) {
+                i++;
+            }
+            insertionPoint = i;
+        } else {
+            insertionPoint = -(i + 1);
+        }
+
+        return arr.length - insertionPoint;
+    }
+}
+
+class Combinator {
+
+    public static List<Index> getCombination(int n) {
+        List<Index> dst = new ArrayList<>();
+
+        getCombination(new boolean[n], 0, -1, dst);
+
+        return dst;
+    }
+
+    private static void getCombination(boolean[] used, int cnt, int prevI, List<Index> dst) {
+
+        int n = used.length;
+
+        if (cnt == n / 2) {
+
+            List<Integer> normalCase = new ArrayList<>(n);
+            List<Integer> oppositeCase = new ArrayList<>(n);
+            for (int i = 0; i < n; i++) {
+                if (used[i]) {
+                    normalCase.add(i);
+                } else {
+                    oppositeCase.add(i);
+                }
+            }
+
+            dst.add(new Index(normalCase, oppositeCase));
+            return;
+        }
+
+        if (prevI == n - 1) {
+            return;
+        }
+
+        for (int trial = prevI + 1; trial < n; trial++) {
+
+            if (!used[trial]) {
+                used[trial] = true;
+                getCombination(used, cnt + 1, trial, dst);
+                used[trial] = false;
+            }
+
+        }
+
+    }
+
+}
+
+class Index {
+
+    final List<Integer> normalCase, oppositeCase;
+
+    public Index(List<Integer> normalCase, List<Integer> oppositeCase) {
+        this.normalCase = normalCase;
+        this.oppositeCase = oppositeCase;
     }
 }
