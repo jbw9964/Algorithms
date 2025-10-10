@@ -1,63 +1,60 @@
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.time.*;
+import java.time.format.*;
+import java.util.*;
 
 class Solution {
-    public int[] solution(String today, String[] terms, String[] privacies) {
-        Map<String, Integer> termsInfoMap = genTermsInfoMap(terms);
 
-        Deque<Integer> queue = new LinkedList<>();
+    private static long currentDay;
+    private static Map<String, Long> termsMap;
 
-        for (int i = 0; i < privacies.length; i++)  {
-            String dueDate = getDuedate(privacies[i], termsInfoMap);
+    private static void init(String today, String[] terms, String[] privacy) {
 
-            if (today.compareTo(dueDate) >= 0)  queue.add(i + 1);
+        currentDay = toDay(today);
+        termsMap = new HashMap<>();
+
+        for (String term : terms) {
+
+            String[] split = term.split(" ");
+
+            String type = split[0];
+            long duration = 28 * Long.parseLong(split[1]);
+
+            termsMap.put(type, duration);
         }
-
-        int[] answer = new int[queue.size()];
-        for (int i = 0; i < answer.length; i++)
-        answer[i] = queue.pollFirst();
-        
-        return answer;
     }
 
-    private Map<String, Integer> genTermsInfoMap(String[] terms) {
-        Map<String, Integer> termsInfoMap = new HashMap<>();
-        for (int i = 0; i < terms.length; i++)  {
-            StringTokenizer tokenizer = new StringTokenizer(terms[i]);
-            termsInfoMap.put(
-                tokenizer.nextToken(), Integer.parseInt(tokenizer.nextToken())
-            );
+    public int[] solution(String today, String[] terms, String[] privacy) {
+
+        init(today, terms, privacy);
+
+        List<Integer> answer = new ArrayList<>();
+        for (int i = 0; i < privacy.length; i++) {
+
+            String[] split = privacy[i].split(" ");
+
+            long enrolledDay = toDay(split[0]);
+            long termDuration = termsMap.get(split[1]);
+
+            long end = enrolledDay + termDuration;
+
+            if (end <= currentDay) {
+                answer.add(i + 1);
+            }
         }
 
-        return termsInfoMap;
+        return answer.stream()
+                .mapToInt(Integer::intValue)
+                .sorted()
+                .toArray();
     }
-    private String getDuedate(String privacy, Map<String, Integer> termsInfoMap)   {
-        StringTokenizer tokenizer = new StringTokenizer(privacy);
 
-        String[] dateCollected = tokenizer.nextToken().split("\\.");
-        int termDuration = termsInfoMap.getOrDefault(tokenizer.nextToken(), -1);
+    private static long toDay(String date) {
 
-        if (termDuration == -1)     return null;
+        String[] parts = date.split("\\.");
+        int year = Integer.parseInt(parts[0]) - 2000;
+        int month = Integer.parseInt(parts[1]) - 1;
+        int day = Integer.parseInt(parts[2]) - 1;
 
-        int yearCollected = Integer.parseInt(dateCollected[0]);
-        int monthCollected = Integer.parseInt(dateCollected[1]);
-        int dayCollected = Integer.parseInt(dateCollected[2]);
-
-        monthCollected += termDuration;
-
-        while (monthCollected > 12) {
-            monthCollected -= 12;
-            yearCollected++;
-        }
-
-        String dueDate = String.format(
-            "%d.%02d.%02d",
-            yearCollected, monthCollected, dayCollected
-        );
-
-        return dueDate;
+        return (12L * 28L) * year + (28L * month) + day;
     }
 }
