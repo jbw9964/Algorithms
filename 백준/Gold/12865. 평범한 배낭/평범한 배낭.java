@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
+class Main {
 
     private static final BufferedReader br = new BufferedReader(
             new InputStreamReader(System.in)
@@ -17,12 +17,13 @@ public class Main {
 
         weights = new int[N];
         values = new int[N];
-
         for (int i = 0; i < N; i++) {
             st = new StringTokenizer(br.readLine());
 
-            weights[i] = Integer.parseInt(st.nextToken());
-            values[i] = Integer.parseInt(st.nextToken());
+            int weight = Integer.parseInt(st.nextToken());
+            int value = Integer.parseInt(st.nextToken());
+            weights[i] = weight;
+            values[i] = value;
         }
     }
 
@@ -33,13 +34,14 @@ public class Main {
         int[] DP = new int[K + 1];
 
         for (int i = 0; i < N; i++) {
-            int currentWeight = weights[i];
-            int currentValue = values[i];
 
-            for (int weight = K; weight >= currentWeight; weight--) {
-                DP[weight] = Math.max(
-                        DP[weight],
-                        DP[weight - currentWeight] + currentValue
+            int baseWeight = weights[i];
+            int baseValue = values[i];
+
+            for (int weightSum = K; weightSum >= baseWeight; weightSum--) {
+                DP[weightSum] = Math.max(
+                        DP[weightSum],
+                        DP[weightSum - baseWeight] + baseValue
                 );
             }
         }
