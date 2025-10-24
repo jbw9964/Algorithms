@@ -1,101 +1,109 @@
 import java.io.*;
 import java.util.*;
-import java.util.function.*;
 
-public class Main {
+class Main {
 
     private static final BufferedReader br = new BufferedReader(
             new InputStreamReader(System.in)
     );
 
-    private static int N, M;
-    private static int[][] numbers;
-    private static boolean[][] mask;
-    private static final boolean VERTICAL = false;
-    private static final boolean HORIZONTAL = !VERTICAL;
+    private static int R, C;
+    private static int[][] table;
+
     private static int ANSWER;
+
+    private static boolean inRange(int r, int c) {
+        return 0 <= r && r < R && 0 <= c && c < C;
+    }
 
     private static void init() throws IOException {
         StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
+        R = Integer.parseInt(st.nextToken());
+        C = Integer.parseInt(st.nextToken());
 
-        mask = new boolean[N][M];
-        numbers = new int[N][];
-        for (int i = 0; i < N; i++) {
-            numbers[i] = Arrays.stream(br.readLine().split(""))
+        table = new int[R][];
+        for (int i = 0; i < R; i++) {
+            table[i] = Arrays.stream(br.readLine().split(""))
                     .mapToInt(Integer::parseInt)
                     .toArray();
         }
-        ANSWER = Integer.MIN_VALUE;
     }
 
     public static void main(String[] args) throws IOException {
+
         init();
 
-        solve(0);
+        dfs(0, 0, new boolean[R][C]);
 
         System.out.println(ANSWER);
     }
 
-    private static void solve(int cnt) {
-        if (cnt == N * M) {
-            ANSWER = Math.max(ANSWER, inspectResult());
+    private static void dfs(int idx, int sum, boolean[][] visited) {
+
+        int r = idx / C;
+        int c = idx % C;
+
+        if (!inRange(r, c)) {
+            ANSWER = Math.max(ANSWER, sum);
             return;
         }
 
-        int r = cnt / M;
-        int c = cnt % M;
+        if (visited[r][c])  {
+            dfs(idx + 1, sum, visited);
+            return;
+        }
 
-        mask[r][c] = HORIZONTAL;
-        solve(cnt + 1);
+        // dfs for horizontal
+        LOOP_H:
+        for (int size = 2; size <= C; size++) {
+            int threshold = c + size - 1;
 
-        mask[r][c] = VERTICAL;
-        solve(cnt + 1);
-    }
-
-    static final BiPredicate<Integer, Integer> excludeVerticals
-            = (r, c) -> mask[r][c] != HORIZONTAL;
-    static final BiPredicate<Integer, Integer> excludeHorizontals
-            = (r, c) -> mask[r][c] != VERTICAL;
-    static final Function<int[], int[]> horizontalNext
-            = (arr) -> new int[]{arr[0], arr[1] + 1};
-    static final Function<int[], int[]> verticalNext
-            = (arr) -> new int[]{arr[0] + 1, arr[1]};
-
-    private static int inspectResult()  {
-
-        int horizontal = inspectResult(excludeVerticals, horizontalNext);
-        int vertical = inspectResult(excludeHorizontals, verticalNext);
-
-        return horizontal + vertical;
-    }
-
-    private static int inspectResult(
-            BiPredicate<Integer, Integer> exclude,
-            Function<int[], int[]> next
-    )  {
-        int sum = 0;
-        boolean[][] visited = new boolean[N][M];
-
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++) {
-
-                if (exclude.test(i, j) || visited[i][j]) {
-                    continue;
+            for (int cc = c; cc <= threshold; cc++) {
+                if (!inRange(r, cc) || visited[r][cc]) {
+                    continue LOOP_H;
                 }
+            }
 
-                int value = 0;
-                int[] curr = new int[]{i, j};
-                while (curr[0] < N && curr[1] < M && !exclude.test(curr[0], curr[1])) {
-                    value = 10 * value + numbers[curr[0]][curr[1]];
-                    visited[curr[0]][curr[1]] = true;
-                    curr = next.apply(curr);
-                }
-                sum += value;
+            int addition = 0;
+            for (int cc = c; cc <= threshold; cc++) {
+                addition = 10 * addition + table[r][cc];
+                visited[r][cc] = true;
+            }
+
+            dfs(idx + 1, sum + addition, visited);
+
+            for (int cc = c; cc <= threshold; cc++) {
+                visited[r][cc] = false;
             }
         }
 
-        return sum;
+        // dfs for vertical
+        LOOP_V:
+        for (int size = 2; size <= R; size++) {
+            int threshold = r + size - 1;
+
+            for (int rr = r; rr <= threshold; rr++) {
+                if (!inRange(rr, c) || visited[rr][c]) {
+                    continue LOOP_V;
+                }
+            }
+
+            int addition = 0;
+            for (int rr = r; rr <= threshold; rr++) {
+                addition = 10 * addition + table[rr][c];
+                visited[rr][c] = true;
+            }
+
+            dfs(idx + 1, sum + addition, visited);
+
+            for (int rr = r; rr <= threshold; rr++) {
+                visited[rr][c] = false;
+            }
+        }
+
+        // dfs for size=1
+        visited[r][c] = true;
+        dfs(idx + 1, sum + table[r][c], visited);
+        visited[r][c] = false;
     }
 }
