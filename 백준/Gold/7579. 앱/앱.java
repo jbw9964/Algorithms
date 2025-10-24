@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.util.stream.*;
 
 class Main {
 
@@ -7,50 +8,46 @@ class Main {
             new InputStreamReader(System.in)
     );
 
-    private static int[] bytes, costs;
-    private static int N, M, MAX;
+    private static int N, M;
+    private static int[] memUsages, reuseCosts;
 
     private static void init() throws IOException {
-        StringTokenizer st1 = new StringTokenizer(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-        N = Integer.parseInt(st1.nextToken());
-        M = Integer.parseInt(st1.nextToken());
-
-        st1 = new StringTokenizer(br.readLine());
-        StringTokenizer st2 = new StringTokenizer(br.readLine());
-
-        bytes = new int[N];
-        costs = new int[N];
-        for (int i = 0; i < N; i++) {
-            bytes[i] = Integer.parseInt(st1.nextToken());
-            costs[i] = Integer.parseInt(st2.nextToken());
-        }
-
-        MAX = Arrays.stream(costs).sum();
+        memUsages = Arrays.stream(br.readLine().split(" "))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+        reuseCosts = Arrays.stream(br.readLine().split(" "))
+                .mapToInt(Integer::parseInt)
+                .toArray();
     }
 
     public static void main(String[] args) throws IOException {
+
         init();
 
-        int[] dp = new int[MAX + 1];
+        int MAX_COST = Arrays.stream(reuseCosts).sum();
+        int[] DP = new int[MAX_COST + 1];
 
         for (int i = 0; i < N; i++) {
-            int currByte = bytes[i];
-            int currCost = costs[i];
+            int baseMem = memUsages[i];
+            int baseCost = reuseCosts[i];
 
-            for (int j = MAX; j >= currCost; j--) {
-                int prev = dp[j - currCost];
-                dp[j] = Math.max(dp[j], prev + currByte);
+            for (int cost = MAX_COST; cost >= baseCost; cost--) {
+                DP[cost] = Math.max(
+                        DP[cost],
+                        DP[cost - baseCost] + baseMem
+                );
             }
         }
 
-        for (int minCost = 0; minCost <= MAX; minCost++) {
-            if (dp[minCost] >= M) {
-                System.out.println(minCost);
-                System.exit(0);
-            }
-        }
+        int answer = IntStream.rangeClosed(0, MAX_COST)
+                .filter(cost -> DP[cost] >= M)
+                .findFirst()
+                .orElseThrow(RuntimeException::new);
 
-        throw new RuntimeException();
+        System.out.println(answer);
     }
 }
